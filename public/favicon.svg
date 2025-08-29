@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#050505"/>
+  <g transform="translate(16, 16)">
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="rotate"
+      from="0 0 0"
+      to="360 0 0"
+      dur="3s"
+      repeatCount="indefinite"
+      additive="sum"/>
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="scale"
+      values="0.8;1.2;0.8"
+      dur="2s"
+      repeatCount="indefinite"
+      additive="sum"/>
+    <path d="M0,-14 L3.5,-4.5 L13.5,-4.5 L5.5,1.5 L8.5,11.5 L0,5.5 L-8.5,11.5 L-5.5,1.5 L-13.5,-4.5 L-3.5,-4.5 Z" fill="#ff3366"/>
+  </g>
+</svg>
