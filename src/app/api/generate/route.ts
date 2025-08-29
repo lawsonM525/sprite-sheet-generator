@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
+import { GoogleGenAI } from '@google/genai'
 
 export async function POST(request: NextRequest) {
   try {
     const { concept, style, frameCount, canvasSize, background } = await request.json()
 
-    // Use API key from environment variable
-    const apiKey = process.env.OPENAI_API_KEY
+    // Use API keys from environment variables
+    const openaiKey = process.env.OPENAI_API_KEY
+    const geminiKey = process.env.GEMINI_API_KEY
     
-    if (!apiKey) {
+    if (!openaiKey || !geminiKey) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'API keys not configured (need both OPENAI_API_KEY and GEMINI_API_KEY)' },
         { status: 500 }
       )
     }
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({ apiKey })
+    // Initialize clients
+    const openai = new OpenAI({ apiKey: openaiKey })
+    const genai = new GoogleGenAI({ apiKey: geminiKey })
 
     // Generate frame plan
     const systemPrompt = `You are an animation planning engine. You maintain consistent style and do not change background or camera angle. Create a frame-by-frame plan for sprite sheet animations.`
@@ -68,9 +71,9 @@ Keep the subject identity constant, background constant, and camera static.`
     // Generate detailed image prompts for each frame
     const imagePrompts = await generateImagePrompts(openai, framePlan, style, background, canvasSize, concept)
 
-    // Generate actual images using DALL-E
+    // Generate actual images using Gemini (sequential with consistency)
     console.log('Generating images for prompts:', imagePrompts.slice(0, 2))
-    const frameImages = await generateFrameImages(openai, imagePrompts, canvasSize)
+    const frameImages = await generateFrameImagesWithGemini(genai, framePlan, style, background, concept)
     console.log('Generated frame images:', frameImages.length, 'frames')
 
     // Assemble sprite sheet
@@ -143,6 +146,91 @@ async function generateFrameImages(
       }
     } catch (error) {
       console.error('Error generating image:', error)
+      // Add placeholder if generation fails
+      images.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==')
+    }
+  }
+  
+  return images
+}
+
+async function generateFrameImagesWithGemini(
+  genai: GoogleGenAI,
+  framePlan: any[],
+  style: string,
+  background: string,
+  concept: string
+): Promise<string[]> {
+  const images: string[] = []
+  let previousImageData: string | null = null
+  
+  const styleDescriptor = getStyleDescriptor(style)
+  const bgDescriptor = background === 'transparent' ? 'transparent background' : 'solid color background'
+  
+  for (let i = 0; i < framePlan.length; i++) {
+    const frame = framePlan[i]
+    const frameDescription = frame.description || `Frame ${i + 1} of ${concept} animation`
+    
+    try {
+      let prompt: any[]
+      
+      if (i === 0) {
+        // First frame - text-to-image
+        prompt = [
+          {
+            text: `Create the first frame of a ${concept} animation sequence. ${frameDescription}. Style: ${styleDescriptor}, ${bgDescriptor}. Make sure this is a high-quality, detailed image that will serve as the foundation for subsequent animation frames. Keep the subject centered and ensure consistency for animation purposes.`
+          }
+        ]
+      } else {
+        // Subsequent frames - use previous image as reference
+        prompt = [
+          {
+            text: `This is frame ${i + 1} of a ${framePlan.length}-frame ${concept} animation sequence. Based on the previous frame provided, create the next frame showing: ${frameDescription}. 
+            
+            IMPORTANT: Maintain the exact same art style, lighting, background, and camera angle as the previous frame. Only change what's described for this specific frame. Keep all other elements (background, colors, composition) exactly the same as the reference image. Style: ${styleDescriptor}, ${bgDescriptor}.`
+          },
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: previousImageData,
+            },
+          }
+        ]
+      }
+
+      const response = await genai.models.generateContent({
+        model: "gemini-2.5-flash-image-preview",
+        contents: prompt,
+      })
+
+      // Extract image data from response
+      let imageData: string | null = null
+      if (response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
+        for (const part of response.candidates[0].content.parts) {
+          if (part.inlineData && part.inlineData.data) {
+            imageData = part.inlineData.data
+            break
+          }
+        }
+      }
+
+      if (imageData) {
+        const base64Image = `data:image/png;base64,${imageData}`
+        images.push(base64Image)
+        // Store the raw base64 data (without data URI prefix) for next frame
+        previousImageData = imageData
+        console.log(`✓ Generated frame ${i + 1}/${framePlan.length}`)
+      } else {
+        console.error(`Failed to generate frame ${i + 1} - no image data in response`)
+        // Add placeholder if generation fails
+        images.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==')
+      }
+      
+      // Add a small delay between requests to be respectful to the API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+    } catch (error) {
+      console.error(`Error generating frame ${i + 1}:`, error)
       // Add placeholder if generation fails
       images.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==')
     }

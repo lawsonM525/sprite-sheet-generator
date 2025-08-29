@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Play, Pause, RotateCw, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -44,7 +45,7 @@ export function SpritePreview({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const img = new Image()
+    const img = new window.Image()
     img.src = spriteSheet
 
     img.onload = () => {
@@ -203,11 +204,14 @@ export function SpritePreview({
                     setIsPlaying(false)
                   }}
                 >
-                  <img
+                  <Image
                     src={frame}
                     alt={`Frame ${index + 1}`}
+                    width={128}
+                    height={128}
                     className="w-full h-auto aspect-square object-cover"
                     style={{ imageRendering: 'pixelated' }}
+                    unoptimized
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-1 py-0.5 text-center">
                     {index + 1}

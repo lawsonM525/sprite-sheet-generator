@@ -68,9 +68,9 @@ export default function Home() {
             <Image 
               src="/dancing-frog.gif" 
               alt="Dancing frog" 
-              width={64}
-              height={64}
-              className="w-16 h-16 object-contain"
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain"
               unoptimized
             />
             <h1 className="text-5xl font-bold text-foreground font-mono-heading">
@@ -81,9 +81,9 @@ export default function Home() {
             <Image 
               src="/dancing-frog.gif" 
               alt="Dancing frog" 
-              width={64}
-              height={64}
-              className="w-16 h-16 object-contain transform scale-x-[-1]"
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain transform scale-x-[-1]"
               unoptimized
             />
           </div>
