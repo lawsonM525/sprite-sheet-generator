@@ -42,7 +42,7 @@ Keep the subject identity constant, background constant, and camera static.`
     try {
       const response = JSON.parse(completion.choices[0].message.content || '{}')
       console.log('Parsed response:', response)
-      framePlan = response.frames || []
+      framePlan = response.animation || response.frames || []
       console.log('Frame plan:', framePlan)
     } catch (error) {
       console.error('Error parsing JSON response:', error)
@@ -129,7 +129,7 @@ async function generateFrameImages(
         model: "dall-e-3",
         prompt: prompt,
         n: 1,
-        size: size >= 512 ? "1024x1024" : "512x512",
+        size: "1024x1024",
         quality: "standard",
       })
       

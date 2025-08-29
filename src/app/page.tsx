@@ -217,6 +217,7 @@ export default function Home() {
                         frameCount={parseInt(frameCount)}
                         frameSize={parseInt(canvasSize)}
                         atlas={generatedSprite.atlas}
+                        frames={generatedSprite.frames}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-64 bg-muted/20 border border-border rounded-lg">

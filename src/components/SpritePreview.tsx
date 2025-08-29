@@ -10,6 +10,7 @@ interface SpritePreviewProps {
   frameCount: number
   frameSize: number
   atlas?: any
+  frames?: string[]
 }
 
 export function SpritePreview({
@@ -17,6 +18,7 @@ export function SpritePreview({
   frameCount,
   frameSize,
   atlas,
+  frames,
 }: SpritePreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
@@ -185,6 +187,36 @@ export function SpritePreview({
             className="w-full"
           />
         </div>
+
+        {frames && frames.length > 0 && (
+          <div className="mt-6 p-4 bg-muted/10 border border-border rounded-lg">
+            <h4 className="font-semibold text-sm mb-4 text-primary">Individual Frames</h4>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+              {frames.map((frame, index) => (
+                <div
+                  key={index}
+                  className={`relative border rounded overflow-hidden bg-checkered cursor-pointer transition-all hover:scale-105 ${
+                    index === currentFrame ? 'border-primary border-2 shadow-lg' : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => {
+                    setCurrentFrame(index)
+                    setIsPlaying(false)
+                  }}
+                >
+                  <img
+                    src={frame}
+                    alt={`Frame ${index + 1}`}
+                    className="w-full h-auto aspect-square object-cover"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-1 py-0.5 text-center">
+                    {index + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {atlas && (
           <div className="mt-4 p-4 bg-muted/20 border border-border rounded-lg">
