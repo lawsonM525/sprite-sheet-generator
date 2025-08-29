@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Play, Pause, RotateCw, Square } from 'lucide-react'
+import { Play, Pause, RotateCw, Square, Scissors, Download, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 
@@ -26,8 +26,51 @@ export function SpritePreview({
   const [isLooping, setIsLooping] = useState(true)
   const [fps, setFps] = useState(10)
   const [currentFrame, setCurrentFrame] = useState(0)
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false)
+  const [transparentSpriteSheet, setTransparentSpriteSheet] = useState<string | null>(null)
   const animationRef = useRef<number>()
   const lastFrameTime = useRef<number>(0)
+
+  const handleRemoveBackground = async () => {
+    if (isRemovingBackground || transparentSpriteSheet) return
+
+    setIsRemovingBackground(true)
+    try {
+      const response = await fetch('/api/remove-background', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageData: spriteSheet
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove background')
+      }
+
+      const result = await response.json()
+      setTransparentSpriteSheet(result.imageData)
+    } catch (error) {
+      console.error('Background removal error:', error)
+      alert('Failed to remove background. Please try again.')
+    } finally {
+      setIsRemovingBackground(false)
+    }
+  }
+
+  const handleDownload = () => {
+    const link = document.createElement('a')
+    link.href = transparentSpriteSheet || spriteSheet
+    link.download = transparentSpriteSheet ? 'spritesheet-transparent.png' : 'spritesheet.png'
+    link.click()
+  }
+
+  const handleCopyCSS = () => {
+    const css = generateCSSAnimation(frameCount, frameSize, fps)
+    navigator.clipboard.writeText(css)
+  }
 
   useEffect(() => {
     const getCols = (count: number) => {
@@ -46,7 +89,7 @@ export function SpritePreview({
     if (!ctx) return
 
     const img = new window.Image()
-    img.src = spriteSheet
+    img.src = transparentSpriteSheet || spriteSheet
 
     img.onload = () => {
       const cols = getCols(frameCount)
@@ -107,7 +150,7 @@ export function SpritePreview({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [spriteSheet, frameCount, frameSize, currentFrame, fps, isPlaying, isLooping])
+  }, [spriteSheet, transparentSpriteSheet, frameCount, frameSize, currentFrame, fps, isPlaying, isLooping])
 
   return (
     <div className="space-y-4">
@@ -167,10 +210,22 @@ export function SpritePreview({
               <Square className="w-4 h-4 mr-2" />
               Reset
             </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRemoveBackground}
+              disabled={isRemovingBackground}
+              className={transparentSpriteSheet ? 'bg-green-100 text-green-800 border-green-300' : ''}
+            >
+              <Scissors className="w-4 h-4 mr-2" />
+              {isRemovingBackground ? 'Removing...' : transparentSpriteSheet ? 'Background Removed' : 'Remove Background'}
+            </Button>
           </div>
           
           <span className="text-sm text-muted-foreground">
             Frame {currentFrame + 1} of {frameCount}
+            {transparentSpriteSheet && <span className="ml-2 text-green-600">• Transparent</span>}
           </span>
         </div>
         
@@ -221,6 +276,25 @@ export function SpritePreview({
             </div>
           </div>
         )}
+
+        <div className="mt-4 space-y-2">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleDownload}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download {transparentSpriteSheet ? 'Transparent ' : ''}Sprite Sheet
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleCopyCSS}
+          >
+            <Copy className="mr-2 h-4 w-4" />
+            Copy CSS Animation
+          </Button>
+        </div>
 
         {atlas && (
           <div className="mt-4 p-4 bg-muted/20 border border-border rounded-lg">

@@ -1,166 +1,148 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
 
 export async function POST(request: NextRequest) {
-  try {
-    const { concept, style, frameCount, canvasSize, background } = await request.json()
+  const { concept, style, frameCount, canvasSize, background } = await request.json()
 
-    // Use API keys from environment variables
-    const openaiKey = process.env.OPENAI_API_KEY
-    const geminiKey = process.env.GEMINI_API_KEY
-    
-    if (!openaiKey || !geminiKey) {
-      return NextResponse.json(
-        { error: 'API keys not configured (need both OPENAI_API_KEY and GEMINI_API_KEY)' },
-        { status: 500 }
-      )
+  // Create a readable stream for Server-Sent Events
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      generateWithProgress(
+        { concept, style, frameCount, canvasSize, background },
+        (progress) => {
+          // Send progress update
+          const data = `data: ${JSON.stringify(progress)}\n\n`
+          controller.enqueue(encoder.encode(data))
+        }
+      ).then((result) => {
+        // Send final result
+        const data = `data: ${JSON.stringify({ type: 'complete', data: result })}\n\n`
+        controller.enqueue(encoder.encode(data))
+        controller.close()
+      }).catch((error) => {
+        // Send error
+        const data = `data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`
+        controller.enqueue(encoder.encode(data))
+        controller.close()
+      })
     }
+  })
 
-    // Initialize clients
-    const openai = new OpenAI({ apiKey: openaiKey })
-    const genai = new GoogleGenAI({ apiKey: geminiKey })
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  })
+}
 
-    // Generate frame plan
-    const systemPrompt = `You are an animation planning engine. You maintain consistent style and do not change background or camera angle. Create a frame-by-frame plan for sprite sheet animations.`
+async function generateWithProgress(
+  options: any,
+  onProgress: (progress: any) => void
+) {
+  const { concept, style, frameCount, canvasSize } = options
+  const background = 'solid' // Always use solid background for generation
+  
+  // Use API keys from environment variables
+  const openaiKey = process.env.OPENAI_API_KEY
+  const geminiKey = process.env.GEMINI_API_KEY
+  
+  if (!openaiKey || !geminiKey) {
+    throw new Error('API keys not configured (need both OPENAI_API_KEY and GEMINI_API_KEY)')
+  }
 
-    const userPrompt = `Create a ${frameCount}-frame animation plan for: "${concept}"
+  // Initialize clients
+  const openai = new OpenAI({ apiKey: openaiKey })
+  const genai = new GoogleGenAI({ apiKey: geminiKey })
+
+  onProgress({ type: 'status', message: 'Planning animation frames...', progress: 0 })
+
+  // Generate frame plan
+  const systemPrompt = `You are an animation planning engine. You maintain consistent style and do not change background or camera angle. Create a frame-by-frame plan for sprite sheet animations.`
+  const userPrompt = `Create a ${frameCount}-frame animation plan for: "${concept}"
 Style: ${style}
 Output a JSON array with frame descriptions showing progression.
 Keep the subject identity constant, background constant, and camera static.`
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-    })
-
-    console.log('Raw LLM response:', completion.choices[0].message.content)
-    
-    let framePlan: any[] = []
-    try {
-      const response = JSON.parse(completion.choices[0].message.content || '{}')
-      console.log('Parsed response:', response)
-      framePlan = response.animation || response.frames || []
-      console.log('Frame plan:', framePlan)
-    } catch (error) {
-      console.error('Error parsing JSON response:', error)
-      console.log('Creating fallback frame plan')
-      // Create fallback frame plan
-      framePlan = Array.from({ length: frameCount }, (_, i) => ({
-        index: i,
-        description: `Frame ${i + 1} of ${concept} animation`
-      }))
-    }
-    
-    // Ensure we have the right number of frames
-    if (framePlan.length === 0 || framePlan.length !== frameCount) {
-      console.log(`Frame plan has ${framePlan.length} frames, but need ${frameCount}. Creating fallback.`)
-      framePlan = Array.from({ length: frameCount }, (_, i) => ({
-        index: i,
-        description: `Frame ${i + 1} of ${concept} animation`
-      }))
-    }
-    
-    console.log('Final frame plan length:', framePlan.length)
-
-    // Generate detailed image prompts for each frame
-    const imagePrompts = await generateImagePrompts(openai, framePlan, style, background, canvasSize, concept)
-
-    // Generate actual images using Gemini (sequential with consistency)
-    console.log('Generating images for prompts:', imagePrompts.slice(0, 2))
-    const frameImages = await generateFrameImagesWithGemini(genai, framePlan, style, background, concept)
-    console.log('Generated frame images:', frameImages.length, 'frames')
-
-    // Assemble sprite sheet
-    console.log('Assembling sprite sheet...')
-    const { spriteSheet, atlas } = await assembleSpriteSheetServer(frameImages, frameCount, canvasSize)
-    console.log('Sprite sheet generated:', !!spriteSheet, spriteSheet?.substring(0, 50))
-
-    const result = {
-      framePlan,
-      frames: frameImages,
-      spriteSheet,
-      atlas,
-      css: generateCSS(frameCount, canvasSize),
-      prompts: imagePrompts,
-    }
-
-    return NextResponse.json(result)
-  } catch (error) {
-    console.error('Generation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate sprite sheet' },
-      { status: 500 }
-    )
-  }
-}
-
-async function generateImagePrompts(
-  openai: OpenAI,
-  framePlan: any[],
-  style: string,
-  background: string,
-  size: number,
-  concept: string
-): Promise<string[]> {
-  const styleDescriptor = getStyleDescriptor(style)
-  // Always generate with solid background - we'll remove it later if needed
-  const bgDescriptor = 'solid white background for easy processing'
-  
-  return framePlan.map((frame: any, index: number) => {
-    const basePrompt = frame.description || frame.textual_change || `Frame ${index + 1} of ${concept}`
-    const consistencyPrompt = 'same art style, same color palette, same lighting, centered subject, clean composition'
-    
-    return `${basePrompt}, ${styleDescriptor}, ${bgDescriptor}, ${consistencyPrompt}, high quality digital art`
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.7,
   })
-}
 
-async function generateFrameImages(
-  openai: OpenAI,
-  prompts: string[],
-  size: number
-): Promise<string[]> {
-  const images: string[] = []
-  
-  for (const prompt of prompts) {
-    try {
-      const response = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-      })
-      
-      const imageUrl = response.data?.[0]?.url
-      if (imageUrl) {
-        // Convert to base64 data URL for client
-        const imageResponse = await fetch(imageUrl)
-        const imageBuffer = await imageResponse.arrayBuffer()
-        const base64 = Buffer.from(imageBuffer).toString('base64')
-        images.push(`data:image/png;base64,${base64}`)
-      }
-    } catch (error) {
-      console.error('Error generating image:', error)
-      // Add placeholder if generation fails
-      images.push('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==')
-    }
+  let framePlan: any[] = []
+  try {
+    const response = JSON.parse(completion.choices[0].message.content || '{}')
+    framePlan = response.animation || response.frames || []
+  } catch (error) {
+    framePlan = Array.from({ length: frameCount }, (_, i) => ({
+      index: i,
+      description: `Frame ${i + 1} of ${concept} animation`
+    }))
   }
   
-  return images
+  // Ensure we have the right number of frames
+  if (framePlan.length === 0 || framePlan.length !== frameCount) {
+    framePlan = Array.from({ length: frameCount }, (_, i) => ({
+      index: i,
+      description: `Frame ${i + 1} of ${concept} animation`
+    }))
+  }
+
+  onProgress({ type: 'status', message: 'Generating frames...', progress: 10 })
+
+  // Generate frame images with progress updates
+  const frameImages = await generateFrameImagesWithProgress(
+    genai, 
+    framePlan, 
+    style, 
+    background, 
+    concept,
+    (frameIndex, total) => {
+      const progress = 10 + Math.round((frameIndex / total) * 70) // 10-80% for frame generation
+      onProgress({ 
+        type: 'progress', 
+        message: `Generating frame ${frameIndex + 1} of ${total}...`, 
+        progress,
+        currentFrame: frameIndex + 1,
+        totalFrames: total
+      })
+    }
+  )
+
+  onProgress({ type: 'status', message: 'Assembling sprite sheet...', progress: 85 })
+
+  // Assemble sprite sheet
+  const { spriteSheet, atlas } = await assembleSpriteSheetServer(frameImages, frameCount, canvasSize)
+
+  onProgress({ type: 'status', message: 'Generating CSS...', progress: 95 })
+
+  const result = {
+    framePlan,
+    frames: frameImages,
+    spriteSheet,
+    atlas,
+    css: generateCSS(frameCount, canvasSize),
+    prompts: [], // We don't use separate prompts anymore
+  }
+
+  return result
 }
 
-async function generateFrameImagesWithGemini(
+async function generateFrameImagesWithProgress(
   genai: GoogleGenAI,
   framePlan: any[],
   style: string,
   background: string,
-  concept: string
+  concept: string,
+  onProgress: (frameIndex: number, total: number) => void
 ): Promise<string[]> {
   const images: string[] = []
   let previousImageData: string | null = null
@@ -170,6 +152,8 @@ async function generateFrameImagesWithGemini(
   const bgDescriptor = 'solid white background for easy processing'
   
   for (let i = 0; i < framePlan.length; i++) {
+    onProgress(i, framePlan.length)
+    
     const frame = framePlan[i]
     const frameDescription = frame.description || `Frame ${i + 1} of ${concept} animation`
     
@@ -217,24 +201,10 @@ async function generateFrameImagesWithGemini(
       }
 
       if (imageData) {
-        let processedImageData = imageData
-        
-        // Remove background if transparent background is requested
-        if (background === 'transparent') {
-          try {
-            processedImageData = await removeBackground(imageData)
-            console.log(`✓ Removed background for frame ${i + 1}`)
-          } catch (error) {
-            console.error(`Failed to remove background for frame ${i + 1}:`, error)
-            // Fall back to original image if background removal fails
-          }
-        }
-        
-        const base64Image = `data:image/png;base64,${processedImageData}`
+        const base64Image = `data:image/png;base64,${imageData}`
         images.push(base64Image)
-        // Store the processed image data (with transparent background) for next frame
-        previousImageData = processedImageData
-        console.log(`✓ Generated frame ${i + 1}/${framePlan.length}`)
+        // Store the image data for next frame
+        previousImageData = imageData
       } else {
         console.error(`Failed to generate frame ${i + 1} - no image data in response`)
         // Add placeholder if generation fails
@@ -254,6 +224,7 @@ async function generateFrameImagesWithGemini(
   return images
 }
 
+// Copy the helper functions from the original route
 async function removeBackground(base64ImageData: string): Promise<string> {
   const sharp = require('sharp')
   
@@ -269,25 +240,7 @@ async function removeBackground(base64ImageData: string): Promise<string> {
       throw new Error('Unable to get image dimensions')
     }
     
-    // Advanced background removal approach:
-    // 1. Detect edges to identify the main subject
-    // 2. Create a mask based on edge detection and color similarity
-    // 3. Apply the mask to create transparency
-    
-    // Step 1: Create an edge-detected version to identify the subject
-    const edges = await sharp(imageBuffer)
-      .greyscale()
-      .convolve({
-        width: 3,
-        height: 3,
-        kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1] // Edge detection kernel
-      })
-      .threshold(30) // Adjust threshold for edge sensitivity
-      .png()
-      .toBuffer()
-    
-    // Step 2: Create a mask by combining edge detection with color analysis
-    // Assume corners are background and find similar colors
+    // Sample corner colors to determine background
     const cornerSize = Math.min(20, Math.floor(width * 0.1), Math.floor(height * 0.1))
     
     // Sample corner colors to determine background
@@ -314,8 +267,7 @@ async function removeBackground(base64ImageData: string): Promise<string> {
       b: Math.round((topLeft.channels[2].mean + topRight.channels[2].mean + bottomLeft.channels[2].mean + bottomRight.channels[2].mean) / 4)
     }
     
-    // Step 3: Create a more sophisticated mask
-    // Remove background colors within tolerance while preserving subject
+    // Create a more sophisticated mask
     const tolerance = 40 // Color tolerance for background removal
     
     const finalImage = await sharp(imageBuffer)

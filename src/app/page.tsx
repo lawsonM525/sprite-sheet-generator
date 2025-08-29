@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Download, Sparkles, Grid3x3 } from 'lucide-react'
 import { SpritePreview } from '@/components/SpritePreview'
+import { ProgressBar } from '@/components/ProgressBar'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
 
 const TEMPLATES = [
@@ -34,14 +35,22 @@ export default function Home() {
   const [selectedStyle, setSelectedStyle] = useState('pixel-art')
   const [frameCount, setFrameCount] = useState('9')
   const [canvasSize, setCanvasSize] = useState('128')
-  const [background, setBackground] = useState('transparent')
+  const [background, setBackground] = useState('solid')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedSprite, setGeneratedSprite] = useState<any>(null)
   const [error, setError] = useState('')
+  const [progress, setProgress] = useState(0)
+  const [progressMessage, setProgressMessage] = useState('')
+  const [currentFrame, setCurrentFrame] = useState<number>()
+  const [totalFrames, setTotalFrames] = useState<number>()
 
   const handleGenerate = async () => {
     setError('')
     setIsGenerating(true)
+    setProgress(0)
+    setProgressMessage('Starting generation...')
+    setCurrentFrame(undefined)
+    setTotalFrames(parseInt(frameCount))
 
     try {
       const result = await generateSpriteSheet({
@@ -50,11 +59,29 @@ export default function Home() {
         frameCount: parseInt(frameCount),
         canvasSize: parseInt(canvasSize),
         background: background as 'transparent' | 'solid',
+      }, (progressData) => {
+        // Update progress based on the progress data
+        if (progressData.progress !== undefined) {
+          setProgress(progressData.progress)
+        }
+        if (progressData.message) {
+          setProgressMessage(progressData.message)
+        }
+        if (progressData.currentFrame !== undefined) {
+          setCurrentFrame(progressData.currentFrame)
+        }
+        if (progressData.totalFrames !== undefined) {
+          setTotalFrames(progressData.totalFrames)
+        }
       })
       
       setGeneratedSprite(result)
+      setProgress(100)
+      setProgressMessage('Generation complete!')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate sprite sheet')
+      setProgress(0)
+      setProgressMessage('')
     } finally {
       setIsGenerating(false)
     }
@@ -166,19 +193,6 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="background">Background</Label>
-                      <Select value={background} onValueChange={setBackground}>
-                        <SelectTrigger id="background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="transparent">Transparent</SelectItem>
-                          <SelectItem value="solid">Solid Color</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
                     <Button
                       onClick={handleGenerate}
                       disabled={isGenerating || (!concept && !selectedTemplate)}
@@ -211,7 +225,22 @@ export default function Home() {
                     <CardDescription>Your generated sprite sheet</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {generatedSprite ? (
+                    {isGenerating ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center h-32 bg-muted/20 border border-border rounded-lg">
+                          <div className="text-center text-muted-foreground">
+                            <Loader2 className="w-8 h-8 mx-auto mb-2 text-primary animate-spin" />
+                            <p>Generating your sprite sheet...</p>
+                          </div>
+                        </div>
+                        <ProgressBar
+                          progress={progress}
+                          message={progressMessage}
+                          currentFrame={currentFrame}
+                          totalFrames={totalFrames}
+                        />
+                      </div>
+                    ) : generatedSprite ? (
                       <SpritePreview
                         spriteSheet={generatedSprite.spriteSheet}
                         frameCount={parseInt(frameCount)}
@@ -228,32 +257,6 @@ export default function Home() {
                       </div>
                     )}
 
-                    {generatedSprite && (
-                      <div className="mt-4 space-y-2">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => {
-                            const link = document.createElement('a')
-                            link.href = generatedSprite.spriteSheet
-                            link.download = 'spritesheet.png'
-                            link.click()
-                          }}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Download Sprite Sheet
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => {
-                            navigator.clipboard.writeText(generatedSprite.css)
-                          }}
-                        >
-                          Copy CSS Animation
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </div>
