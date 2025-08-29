@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Download, Sparkles, Grid3x3 } from 'lucide-react'
 import { SpritePreview } from '@/components/SpritePreview'
 import { ProgressBar } from '@/components/ProgressBar'
+import { UserMenu } from '@/components/auth/UserMenu'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
 
 const TEMPLATES = [
@@ -90,6 +91,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-end mb-4">
+          <UserMenu />
+        </div>
         <header className="text-center mb-10">
           <div className="flex items-center justify-center gap-4 mb-2">
             <Image 

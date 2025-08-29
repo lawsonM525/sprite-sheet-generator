@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 const jetbrainsMono = JetBrains_Mono({
@@ -35,7 +36,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} ${jetbrainsMono.variable}`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <script src="/favicon-animate.js" defer />
       </body>
     </html>
