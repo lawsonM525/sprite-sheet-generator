@@ -52,6 +52,66 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        'rich-black': {
+          DEFAULT: '#001514',
+          100: '#000404',
+          200: '#000808',
+          300: '#000c0c',
+          400: '#001010',
+          500: '#001514',
+          600: '#007670',
+          700: '#00d8cd',
+          800: '#3bfff5',
+          900: '#9dfffa'
+        },
+        'citron': {
+          DEFAULT: '#c2d076',
+          100: '#2c3111',
+          200: '#586121',
+          300: '#849232',
+          400: '#adc046',
+          500: '#c2d076',
+          600: '#cfda92',
+          700: '#dbe3ad',
+          800: '#e7ecc8',
+          900: '#f3f6e4'
+        },
+        'mimi-pink': {
+          DEFAULT: '#ffe1ea',
+          100: '#60001d',
+          200: '#c0003a',
+          300: '#ff2163',
+          400: '#ff81a6',
+          500: '#ffe1ea',
+          600: '#ffe7ee',
+          700: '#ffedf2',
+          800: '#fff3f6',
+          900: '#fff9fb'
+        },
+        'violet': {
+          DEFAULT: '#ffa0fd',
+          100: '#530051',
+          200: '#a500a2',
+          300: '#f800f4',
+          400: '#ff4bfc',
+          500: '#ffa0fd',
+          600: '#ffb1fe',
+          700: '#ffc5fe',
+          800: '#ffd8fe',
+          900: '#ffecff'
+        },
+        'purple-pizzazz': {
+          DEFAULT: '#e952de',
+          100: '#380735',
+          200: '#700f69',
+          300: '#a8169e',
+          400: '#e01dd3',
+          500: '#e952de',
+          600: '#ed76e5',
+          700: '#f298ec',
+          800: '#f6baf2',
+          900: '#fbddf9'
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
