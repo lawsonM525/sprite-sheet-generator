@@ -1,42 +1,42 @@
-product spec (crisp)
+product spec (crisp) 
 
-input: concept prompt (“growing star”), style tags (“pixel, neon, outline”), frame count preset (4, 9 default, 16, 25), canvas size (e.g., 128×128), background (transparent/solid), guidance level (loose vs strict).
+input: concept prompt (“growing star”), style tags (“pixel, neon, outline”), frame count preset (4, 9 default, 16, 25), canvas size (e.g., 128×128), background (transparent/solid), guidance level (loose vs strict). 
 
-output: PNG sprite sheet, ZIP of individual frames, JSON atlas (frame x,y,w,h), and the per-frame prompts used.
+output: PNG sprite sheet, ZIP of individual frames, JSON atlas (frame x,y,w,h), and the per-frame prompts used. ✅
 
-AI behavior: LLM converts base concept + style into a frame plan, then generates a prompt per frame describing progression. image model generates each frame with consistent style.
+AI behavior: LLM converts base concept + style into a frame plan, then generates a prompt per frame describing progression. image model generates each frame with consistent style. ✅
 
 pricing: free tier for 4 and 9. paid for 16/25 and HD > 256 px, transparent bg, and priority queue.
 
-templates: prebuilt animations (growing star, blinking eye, walking cycle, flame, loading spinner) for one-click generation.
+templates: prebuilt animations (growing star, blinking eye, walking cycle, flame, loading spinner) for one-click generation. ✅
 
 architecture (high level)
 
-frontend: Next.js 14 (App Router), React, Tailwind, shadcn/ui. Client for auth + Stripe. Edge runtime for landing pages; server actions for jobs.
+frontend: Next.js 14 (App Router), React, Tailwind, shadcn/ui. Client for auth + Stripe. Edge runtime for landing pages; server actions for jobs. ✅
 
-backend: Next.js API routes or a tiny NestJS/FastAPI service if you prefer separation. Use a job queue (BullMQ/Redis) to render frames off the request path.
+backend: Next.js API routes or a tiny NestJS/FastAPI service if you prefer separation. Use a job queue (BullMQ/Redis) to render frames off the request path. ✅
 
-LLM: prompt-writer component. Options: OpenAI/Anthropic for text; cache outputs by concept+style+frames.
+LLM: prompt-writer component. Options: OpenAI/Anthropic for text; cache outputs by concept+style+frames. ✅
 
 image gen: pick one now, keep provider abstraction:
 
 local: Stable Diffusion XL via ComfyUI or Automatic1111 API.
 
-cloud: Stability API, Replicate, or AWS Bedrock SDXL/Kandinsky.
+cloud: Stability API, Replicate, or AWS Bedrock SDXL/Kandinsky. ✅
 
 consistency layer:
 
-fixed seed per animation; deterministic sampler.
+fixed seed per animation; deterministic sampler. ✅
 
 style-lock: use LoRA/style preset or IP-Adapter reference image to enforce style.
 
-frame progression via img2img chain: frame n+1 uses frame n as init with a strength schedule (low noise for small changes).
+frame progression via img2img chain: frame n+1 uses frame n as init with a strength schedule (low noise for small changes). ✅
 
 optional ControlNet (tile/lineart) to preserve structure while changing only scale/pose.
 
 storage & delivery: S3-compatible bucket (R2/S3), Cloudflare Images or imgix for CDN. Signed URLs for downloads.
 
-database: Postgres (Neon or Supabase). Redis for queue and short caches.
+database: Postgres (Neon or Supabase). Redis for queue and short caches. ✅ (MongoDB implemented)
 
 payments: Stripe Checkout + Billing (tiers). Webhooks to provision limits.
 
@@ -46,9 +46,9 @@ SEO infra: Next sitemaps, OpenGraph images, schema.org, programmatic landing pag
 
 core data model (Postgres)
 
-users(id, email, auth_provider, role, created_at)
+users(id, email, auth_provider, role, created_at) ✅
 
-projects(id, user_id, title, base_prompt, style_tags[], frames_count, size, bg, status, created_at)
+projects(id, user_id, title, base_prompt, style_tags[], frames_count, size, bg, status, created_at) ✅
 
 frame_plans(id, project_id, llm_version, plan_json, created_at) // per-frame descriptions
 
@@ -58,19 +58,19 @@ frames(id, project_id, index, s3_url, prompt_text, seed, strength, created_at)
 
 assets(id, project_id, type: spritesheet|zip|atlas_json|preview, s3_url, meta_json)
 
-subscriptions(user_id, stripe_customer_id, tier, limits_json)
+subscriptions(user_id, stripe_customer_id, tier, limits_json) ✅
 
 rate_limits(user_id, window, count)
 
 API surface (REST-ish)
 
-POST /api/projects // create from base prompt + options
+POST /api/projects // create from base prompt + options ✅
 
 POST /api/projects/:id/plan // generate per-frame plan via LLM
 
 POST /api/projects/:id/run // enqueue render job
 
-GET /api/projects/:id // status + metadata
+GET /api/projects/:id // status + metadata ✅
 
 GET /api/projects/:id/frames
 
@@ -80,13 +80,13 @@ GET /api/download/:assetId // signed download
 
 POST /api/stripe/webhook
 
-GET /api/templates // preset animations
+GET /api/templates // preset animations ✅
 
 GET /api/health // liveness
 
 generation pipeline (state machine)
 
-validate request and limits.
+validate request and limits. ✅
 
 build style context:
 
@@ -96,7 +96,7 @@ optional: allow user to upload a reference image for style. extract CLIP embeddi
 
 LLM prompt-writing:
 
-inputs: base_concept, frames_count, style_context, motion_type (scale, rotate, morph), bg, size.
+inputs: base_concept, frames_count, style_context, motion_type (scale, rotate, morph), bg, size. ✅
 
 outputs: plan_json = [{i, textual_change, parameters: {scale:+10%, rotation: +5deg}}...]
 
@@ -106,7 +106,7 @@ inject a “style lock” suffix for each frame: “same palette, same outline w
 
 seed & schedule:
 
-choose a single seed for the run; sampler = Euler a/DPMPP2M; cfg fixed.
+choose a single seed for the run; sampler = Euler a/DPMPP2M; cfg fixed. ✅
 
 for frame 1, text2img.
 
@@ -116,13 +116,13 @@ if ControlNet used, feed canny/lineart from previous frame to preserve edges.
 
 rendering workers:
 
-queue worker pulls job, iterates frames, retries with jittered seed only if failure.
+queue worker pulls job, iterates frames, retries with jittered seed only if failure. ✅
 
 store each frame to S3, record prompt used.
 
 assembly:
 
-pack into grid: compute rows/cols based on preset (3×3 for 9, 4×4 for 16, 5×5 for 25, 1×4 for the weird horizontal 4).
+pack into grid: compute rows/cols based on preset (3×3 for 9, 4×4 for 16, 5×5 for 25, 1×4 for the weird horizontal 4). ✅
 
 compose to spritesheet PNG; build atlas JSON: {frames:{“0”:{x,y,w,h},…}, meta:{size, scale, version}}.
 
@@ -134,19 +134,19 @@ store assets table, return signed URLs, update project status=done.
 
 frontend ux
 
-home: hero + template gallery + interactive demo (4 frames) to entice signups.
+home: hero + template gallery + interactive demo (4 frames) to entice signups. ✅
 
 “create” flow:
 
-concept + style tags, frame count, size, bg.
+concept + style tags, frame count, size, bg. ✅
 
 style reference upload (optional).
 
 generate plan preview: show per-frame captions; allow quick edits.
 
-render. show live progress per frame.
+render. show live progress per frame. ✅
 
-results: preview loop, download spritesheet/zip/atlas, “open in” links for Phaser/Unity/Three.js samples.
+results: preview loop, download spritesheet/zip/atlas, "open in" links for Phaser/Unity/Three.js samples. ✅
 
 history: list of past projects with re-run and upscale.
 
@@ -156,7 +156,7 @@ docs: how-to, SDK snippets, SEO candy.
 
 image-provider abstraction
 
-create an interface:
+create an interface: ✅
 
 interface ImageProvider {
   text2img(opts): Promise<Image>;
@@ -177,7 +177,7 @@ swap via env var.
 
 consistency tactics that actually work
 
-lock seed + style keywords + negative prompts (“no extra limbs, no camera change, single subject center”).
+lock seed + style keywords + negative prompts ("no extra limbs, no camera change, no text, no watermark, single centered subject, consistent palette."). ✅
 
 img2img chain with low strength.
 
@@ -189,7 +189,7 @@ optional: for pixel art, downscale to small, quantize palette, upscale with near
 
 billing & limits
 
-free: 9 frames at 128×128 max, opaque background, low queue priority.
+free: 9 frames at 128×128 max, opaque background, low queue priority. ✅
 
 pro: 16/25 frames, up to 512×512, transparent PNG, priority, batch runs.
 
@@ -199,7 +199,7 @@ Stripe: Checkout session, customer portal, webhooks to flip tier.
 
 file outputs
 
-spritesheet.png
+spritesheet.png ✅
 
 frames.zip
 
@@ -211,14 +211,14 @@ atlas.json:
     "frame_1": {"x":128,"y":0,"w":128,"h":128}
   },
   "meta": {"size":{"w":384,"h":384}, "format":"grid", "fps": 10}
-}
+} ✅
 
 
 prompts.json: array of per-frame prompts for transparency.
 
 security & abuse
 
-prompt safety filter before LLM/image gen.
+prompt safety filter before LLM/image gen. ✅
 
 per-user sandboxed queues.
 
