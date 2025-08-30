@@ -74,7 +74,7 @@ export function SpritePreview({
 
   useEffect(() => {
     const getCols = (count: number) => {
-      if (count === 4) return 4
+      if (count === 4) return 2
       return Math.ceil(Math.sqrt(count))
     }
 
@@ -310,7 +310,12 @@ export function SpritePreview({
 }
 
 function generateCSSAnimation(frameCount: number, frameSize: number, fps: number) {
-  const cols = Math.ceil(Math.sqrt(frameCount))
+  const getCols = (count: number) => {
+    if (count === 4) return 2
+    return Math.ceil(Math.sqrt(count))
+  }
+  
+  const cols = getCols(frameCount)
   const totalWidth = cols * frameSize
   
   return `.sprite-animation {
@@ -323,7 +328,7 @@ function generateCSSAnimation(frameCount: number, frameSize: number, fps: number
 
 @keyframes sprite-frames {
   to {
-    background-position: -${totalWidth * frameCount}px 0;
+    background-position: -${totalWidth}px 0;
   }
 }`
 }

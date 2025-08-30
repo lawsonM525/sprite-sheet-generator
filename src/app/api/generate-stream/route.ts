@@ -361,7 +361,12 @@ async function assembleSpriteSheetServer(
 ): Promise<{ spriteSheet: string; atlas: any }> {
   const sharp = require('sharp')
   
-  const cols = Math.ceil(Math.sqrt(frameCount))
+  const getCols = (count: number) => {
+    if (count === 4) return 2
+    return Math.ceil(Math.sqrt(count))
+  }
+  
+  const cols = getCols(frameCount)
   const rows = Math.ceil(frameCount / cols)
   
   const atlas: any = {
