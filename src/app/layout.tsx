@@ -36,6 +36,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Analytics Scripts */}
+        <script
+          defer
+          data-website-id="68b37286d0865aeb4b5644dd"
+          data-domain="sprite-sheet-generator.com"
+          src="https://datafa.st/js/script.js">
+        </script>
+        
         {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPDL14R2NZ"></script>
         <script
