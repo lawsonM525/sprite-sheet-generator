@@ -45,6 +45,25 @@ export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentFrame, setCurrentFrame] = useState<number>()
   const [totalFrames, setTotalFrames] = useState<number>()
+  const [referenceImage, setReferenceImage] = useState<File | null>(null)
+  const [referenceImagePreview, setReferenceImagePreview] = useState<string | null>(null)
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setReferenceImage(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setReferenceImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeReferenceImage = () => {
+    setReferenceImage(null)
+    setReferenceImagePreview(null)
+  }
 
   const handleGenerate = async () => {
     setError('')
@@ -56,11 +75,12 @@ export default function Home() {
 
     try {
       const result = await generateSpriteSheet({
-        concept: selectedTemplate || concept,
-        style: selectedStyle,
+        concept,
         frameCount: parseInt(frameCount),
         canvasSize: parseInt(canvasSize),
-        background: background as 'transparent' | 'solid',
+        background: background as 'solid' | 'transparent',
+        style: selectedStyle,
+        referenceImage: referenceImage || undefined,
       }, (progressData) => {
         // Update progress based on the progress data
         if (progressData.progress !== undefined) {
@@ -193,6 +213,63 @@ export default function Home() {
                       rows={4}
                       className="w-full text-base sm:text-lg bg-rich-black-300 border-rich-black-400 text-mimi-pink-500 placeholder-citron-400 focus:border-purple-pizzazz focus:ring-purple-pizzazz"
                     />
+                  </div>
+
+                  {/* Reference Image Upload */}
+                  <div>
+                    <Label className="text-sm font-medium text-citron-600 mb-2 block">
+                      Reference Image (Optional)
+                    </Label>
+                    <div className="space-y-3">
+                      {referenceImagePreview ? (
+                        <div className="relative">
+                          <div className="flex items-center gap-3 p-3 bg-rich-black-300 border border-rich-black-400 rounded-lg">
+                            <Image
+                              src={referenceImagePreview}
+                              alt="Reference image preview"
+                              width={48}
+                              height={48}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <p className="text-sm text-mimi-pink-500 font-medium">Reference image uploaded</p>
+                              <p className="text-xs text-citron-500">This will guide the AI in creating your sprite sheet</p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={removeReferenceImage}
+                              className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-rich-black-400 rounded-lg p-6 text-center hover:border-purple-pizzazz transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            id="reference-image-upload"
+                          />
+                          <label
+                            htmlFor="reference-image-upload"
+                            className="cursor-pointer block"
+                          >
+                            <div className="text-citron-500 mb-2">
+                              <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-sm text-citron-600 mb-1">Click to upload a reference image</p>
+                            <p className="text-xs text-citron-500">PNG, JPG up to 10MB</p>
+                          </label>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

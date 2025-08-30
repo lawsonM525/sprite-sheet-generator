@@ -4,6 +4,7 @@ interface GenerateOptions {
   frameCount: number
   canvasSize: number
   background: 'transparent' | 'solid'
+  referenceImage?: File
 }
 
 interface FramePlan {
@@ -39,21 +40,25 @@ export async function generateSpriteSheet(
   options: GenerateOptions, 
   onProgress?: ProgressCallback
 ): Promise<SpriteResult> {
-  const { concept, style, frameCount, canvasSize, background } = options
+  const { concept, style, frameCount, canvasSize, background, referenceImage } = options
 
   try {
+    // Create FormData to handle both text and file data
+    const formData = new FormData()
+    formData.append('concept', concept)
+    formData.append('style', style)
+    formData.append('frameCount', frameCount.toString())
+    formData.append('canvasSize', canvasSize.toString())
+    formData.append('background', background)
+    
+    if (referenceImage) {
+      formData.append('referenceImage', referenceImage)
+    }
+
     // Call the streaming API route
     const response = await fetch('/api/generate-stream', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        concept,
-        style,
-        frameCount,
-        canvasSize,
-      }),
+      body: formData,
     })
 
     if (!response.ok) {

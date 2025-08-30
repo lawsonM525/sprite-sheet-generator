@@ -3,14 +3,20 @@ import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
 
 export async function POST(request: NextRequest) {
-  const { concept, style, frameCount, canvasSize, background } = await request.json()
+  const formData = await request.formData()
+  const concept = formData.get('concept') as string
+  const style = formData.get('style') as string
+  const frameCount = parseInt(formData.get('frameCount') as string)
+  const canvasSize = parseInt(formData.get('canvasSize') as string)
+  const background = formData.get('background') as string
+  const referenceImage = formData.get('referenceImage') as File | null
 
   // Create a readable stream for Server-Sent Events
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     start(controller) {
       generateWithProgress(
-        { concept, style, frameCount, canvasSize, background },
+        { concept, style, frameCount, canvasSize, background, referenceImage },
         (progress) => {
           // Send progress update
           const data = `data: ${JSON.stringify(progress)}\n\n`
@@ -43,7 +49,7 @@ async function generateWithProgress(
   options: any,
   onProgress: (progress: any) => void
 ) {
-  const { concept, style, frameCount, canvasSize } = options
+  const { concept, style, frameCount, canvasSize, referenceImage } = options
   const background = 'solid' // Always use solid background for generation
   
   // Use API keys from environment variables
@@ -60,10 +66,20 @@ async function generateWithProgress(
 
   onProgress({ type: 'status', message: 'Planning animation frames...', progress: 0 })
 
+  // Convert reference image to base64 if provided
+  let referenceImageData: string | null = null
+  if (referenceImage) {
+    const arrayBuffer = await referenceImage.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    referenceImageData = buffer.toString('base64')
+  }
+
   // Generate frame plan
   const systemPrompt = `You are an animation planning engine. You maintain consistent style and do not change background or camera angle. Create a frame-by-frame plan for sprite sheet animations.`
-  const userPrompt = `Create a ${frameCount}-frame animation plan for: "${concept}"
+  
+  let userPrompt = `Create a ${frameCount}-frame animation plan for: "${concept}"
 Style: ${style}
+${referenceImage ? 'IMPORTANT: A reference image has been provided. Use this image as the visual foundation - maintain the same character design, art style, colors, and overall aesthetic shown in the reference image.' : ''}
 Output a JSON array with frame descriptions showing progression.
 Keep the subject identity constant, background constant, and camera static.`
 
@@ -105,6 +121,7 @@ Keep the subject identity constant, background constant, and camera static.`
     style, 
     background, 
     concept,
+    referenceImageData,
     (frameIndex, total) => {
       const progress = 10 + Math.round((frameIndex / total) * 70) // 10-80% for frame generation
       onProgress({ 
@@ -142,6 +159,7 @@ async function generateFrameImagesWithProgress(
   style: string,
   background: string,
   concept: string,
+  referenceImageData: string | null,
   onProgress: (frameIndex: number, total: number) => void
 ): Promise<string[]> {
   const images: string[] = []
@@ -161,12 +179,26 @@ async function generateFrameImagesWithProgress(
       let prompt: any[]
       
       if (i === 0) {
-        // First frame - text-to-image
-        prompt = [
-          {
-            text: `Create the first frame of a ${concept} animation sequence. ${frameDescription}. Style: ${styleDescriptor}, ${bgDescriptor}. Make sure this is a high-quality, detailed image that will serve as the foundation for subsequent animation frames. Keep the subject centered and ensure consistency for animation purposes.`
-          }
-        ]
+        // First frame - use reference image if provided, otherwise text-to-image
+        if (referenceImageData) {
+          prompt = [
+            {
+              text: `Create the first frame of a ${concept} animation sequence based on this reference image. ${frameDescription}. Maintain the exact same art style, character design, colors, and aesthetic as shown in the reference image. Style: ${styleDescriptor}, ${bgDescriptor}. Keep the subject centered and ensure consistency for animation purposes.`
+            },
+            {
+              inlineData: {
+                mimeType: "image/png",
+                data: referenceImageData,
+              },
+            }
+          ]
+        } else {
+          prompt = [
+            {
+              text: `Create the first frame of a ${concept} animation sequence. ${frameDescription}. Style: ${styleDescriptor}, ${bgDescriptor}. Make sure this is a high-quality, detailed image that will serve as the foundation for subsequent animation frames. Keep the subject centered and ensure consistency for animation purposes.`
+            }
+          ]
+        }
       } else {
         // Subsequent frames - use previous image as reference
         prompt = [
