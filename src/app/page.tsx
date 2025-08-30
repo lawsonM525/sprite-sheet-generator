@@ -42,6 +42,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState('')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentFrame, setCurrentFrame] = useState<number>()
   const [totalFrames, setTotalFrames] = useState<number>()
 
@@ -91,7 +92,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
-      <nav className="flex justify-between items-center px-6 py-4 border-b border-rich-black-300">
+      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
         <div className="flex items-center gap-2">
           <Image 
             src="/pink-sprinkles.gif" 
@@ -101,29 +102,64 @@ export default function Home() {
             className="w-8 h-8 object-contain"
             unoptimized
           />
-          <span className="text-xl font-bold text-mimi-pink-500">Sprite Sheet Generator</span>
+          <span className="text-lg sm:text-xl font-bold text-mimi-pink-500">Sprite Sheet Generator</span>
         </div>
         
-        <div className="flex items-center gap-6">
-          <a href="#" className="text-citron-600 hover:text-citron-500 transition-colors">
+        {/* Desktop Menu */}
+        <div className="hidden sm:flex items-center gap-6">
+          <a href="/how-to-use-sprite-sheets" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             How to use sprite sheets
           </a>
-          <a href="#" className="text-citron-600 hover:text-citron-500 transition-colors">
+          <a href="#" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Pricing
           </a>
           <UserMenu />
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="sm:hidden flex flex-col gap-1 p-2"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
+          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-opacity ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
+          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+        </button>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-rich-black-200 border-b border-rich-black-300 sm:hidden z-50">
+            <div className="flex flex-col px-4 py-4 space-y-4">
+              <a 
+                href="/how-to-use-sprite-sheets" 
+                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                How to use sprite sheets
+              </a>
+              <a 
+                href="#" 
+                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Pricing
+              </a>
+              <div onClick={() => setIsMobileMenuOpen(false)}>
+                <UserMenu />
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
       <div className="text-center py-16 px-4">
-        <div className="mb-4">
-          <span className="text-sm font-medium text-purple-pizzazz uppercase tracking-wide">FREE TOOLS</span>
-        </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-mimi-pink-500 mb-6">
+     
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-mimi-pink-500 mb-6">
           Sprite Sheet Generator
         </h1>
-        <p className="text-xl text-citron-600 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg sm:text-xl text-citron-600 max-w-3xl mx-auto leading-relaxed px-4">
           Create perfect sprite sheets with guaranteed character consistency. Our AI ensures 
           your character maintains the same dimensions and appearance across all frames, 
           making it easy to use for CSS animations and game development.
@@ -136,8 +172,8 @@ export default function Home() {
           {/* Form Section */}
           <div>
             <Card className="bg-rich-black-200 border-rich-black-400 shadow-2xl">
-              <CardContent className="p-8">
-                <div className="text-center mb-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="text-center mb-6 sm:mb-8">
                   <Image 
                     src="/pink-sprinkles.gif" 
                     alt="Pink sprinkles" 
@@ -148,18 +184,18 @@ export default function Home() {
                   />
                 </div>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div>
                     <Textarea
                       placeholder="Generate a sprite sheet about..."
                       value={concept}
                       onChange={(e) => setConcept(e.target.value)}
                       rows={4}
-                      className="w-full text-lg bg-rich-black-300 border-rich-black-400 text-mimi-pink-500 placeholder-citron-400 focus:border-purple-pizzazz focus:ring-purple-pizzazz"
+                      className="w-full text-base sm:text-lg bg-rich-black-300 border-rich-black-400 text-mimi-pink-500 placeholder-citron-400 focus:border-purple-pizzazz focus:ring-purple-pizzazz"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-medium text-citron-600">Frame Count</Label>
                       <Select value={frameCount} onValueChange={setFrameCount}>
@@ -295,12 +331,12 @@ export default function Home() {
 
       {/* Templates Section */}
       <div className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-mimi-pink-500 mb-4">Popular Templates</h2>
-          <p className="text-citron-600">Get started quickly with these pre-made animation concepts</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-mimi-pink-500 mb-4">Popular Templates</h2>
+          <p className="text-citron-600 px-4">Get started quickly with these pre-made animation concepts</p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {TEMPLATES.map((template) => (
             <Card
               key={template.value}
@@ -310,12 +346,12 @@ export default function Home() {
                 setConcept(template.description)
               }}
             >
-              <CardHeader>
-                <CardTitle className="text-xl text-mimi-pink-500">{template.label}</CardTitle>
-                <CardDescription className="text-citron-500">{template.description}</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl text-mimi-pink-500">{template.label}</CardTitle>
+                <CardDescription className="text-citron-500 text-sm sm:text-base">{template.description}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button variant="outline" className="w-full border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white">
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Button variant="outline" className="w-full border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white text-sm sm:text-base">
                   Use This Template
                 </Button>
               </CardContent>
