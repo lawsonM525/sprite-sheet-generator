@@ -455,6 +455,7 @@ function getStyleDescriptor(style: string): string {
     'neon-outline': 'neon outline style, glowing edges, vibrant neon colors, dark background, cyberpunk aesthetic',
     'cel-shaded': 'cel shaded style, flat colors, bold black outlines, anime/cartoon aesthetic, clean shading',
     'vaporwave': 'vaporwave aesthetic, pastel pink and blue colors, retro 80s style, gradient effects, synthwave',
+    'sketchy-doodle': 'sketchy doodle art style, hand-drawn line art, loose sketchy lines, doodling aesthetic, rough pencil or pen strokes, casual artistic style',
   }
   
   return styleMap[style] || 'digital art style'

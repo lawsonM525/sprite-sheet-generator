@@ -27,6 +27,7 @@ const STYLES = [
   { value: 'neon-outline', label: 'Neon Outline' },
   { value: 'cel-shaded', label: 'Cel Shaded' },
   { value: 'vaporwave', label: 'Vaporwave' },
+  { value: 'sketchy-doodle', label: 'Sketchy Doodle' },
 ]
 
 export default function Home() {
