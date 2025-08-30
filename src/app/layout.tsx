@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 
@@ -43,24 +44,26 @@ export default function RootLayout({
           data-domain="sprite-sheet-generator.com"
           src="https://datafa.st/js/script.js">
         </script>
-        
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPDL14R2NZ"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-HPDL14R2NZ');
-            `,
-          }}
-        />
       </head>
       <body className={`${inter.className} ${jetbrainsMono.variable}`}>
         <AuthProvider>
           {children}
         </AuthProvider>
+        
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-HPDL14R2NZ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-HPDL14R2NZ');
+          `}
+        </Script>
+        
         <script src="/favicon-animate.js" defer />
       </body>
     </html>

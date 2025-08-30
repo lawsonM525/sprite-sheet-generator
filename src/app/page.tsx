@@ -314,10 +314,13 @@ export default function Home() {
               <Card className="bg-rich-black-200 border-rich-black-400 shadow-2xl h-full">
                 <CardContent className="p-8 flex items-center justify-center h-full">
                   <div className="text-center text-citron-600">
-                    <img 
+                    <Image 
                       src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2hyaWV3a25tamExajY2d3l0MjdjdDE1ZjNnOWkzMTl3amNha2FiYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/dCjgjlXrflbRFqNiRL/giphy.gif"
                       alt="Animated sprite sheet"
+                      width={96}
+                      height={96}
                       className="w-24 h-24 mx-auto mb-4 object-contain"
+                      unoptimized
                     />
                     <h3 className="text-xl font-semibold text-mimi-pink-500 mb-2">Your sprite sheet will appear here</h3>
                     <p className="text-citron-500">Enter a concept and click generate to create your sprite sheet with perfect character consistency</p>
