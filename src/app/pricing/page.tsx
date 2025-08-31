@@ -1,15 +1,10 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, X } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import Navigation from '@/components/Navigation'
 
 export default function PricingPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
   const plans = [
     {
       name: 'Free',
@@ -81,64 +76,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
-      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
-        <Link href="/" className="flex items-center gap-2">
-          <Image 
-            src="/pink-sprinkles.gif" 
-            alt="Pink sprinkles" 
-            width={32}
-            height={32}
-            className="w-8 h-8 object-contain"
-            unoptimized
-          />
-          <span className="text-lg sm:text-xl font-bold text-mimi-pink-500">Sprite Sheet Generator</span>
-        </Link>
-        
-        {/* Desktop Menu */}
-        <div className="hidden sm:flex items-center gap-6">
-          <Link href="/" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
-            Home
-          </Link>
-          <Link href="/how-to-use-sprite-sheets" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
-            How to use sprite sheets
-          </Link>
-          <span className="text-citron-500">Pricing</span>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="sm:hidden flex flex-col gap-1 p-2"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-opacity ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
-        </button>
-
-        {/* Mobile Menu Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-rich-black-200 border-b border-rich-black-300 sm:hidden z-50">
-            <div className="flex flex-col px-4 py-4 space-y-4">
-              <Link 
-                href="/" 
-                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                href="/how-to-use-sprite-sheets" 
-                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                How to use sprite sheets
-              </Link>
-              <span className="text-citron-500">Pricing</span>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navigation active="pricing" />
 
       {/* Hero Section */}
       <div className="text-center py-12 sm:py-16 px-4">
