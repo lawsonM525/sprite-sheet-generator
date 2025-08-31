@@ -69,7 +69,7 @@ export default function HowToUseSpriteSheets() {
           <Link href="/" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Home
           </Link>
-          <a href="#" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
+          <a href="/pricing" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Pricing
           </a>
         </div>
@@ -97,7 +97,7 @@ export default function HowToUseSpriteSheets() {
                 Home
               </Link>
               <a 
-                href="#" 
+                href="/pricing" 
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

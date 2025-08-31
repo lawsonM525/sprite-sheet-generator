@@ -24,6 +24,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.0",
+    "dotenv": "^17.2.1",
     "file-saver": "^2.0.5",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
@@ -36,6 +37,7 @@
     "react": "^18",
     "react-dom": "^18",
     "sharp": "^0.33.2",
+    "stripe": "^18.5.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7"
   },

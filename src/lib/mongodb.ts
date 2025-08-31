@@ -30,6 +30,7 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      dbName: 'main' // Force connection to main database
     }
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts)

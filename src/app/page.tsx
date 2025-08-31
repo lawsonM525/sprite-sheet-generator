@@ -130,7 +130,7 @@ export default function Home() {
           <a href="/how-to-use-sprite-sheets" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             How to use sprite sheets
           </a>
-          <a href="#" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
+          <a href="/pricing" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Pricing
           </a>
           <UserMenu />
@@ -159,7 +159,7 @@ export default function Home() {
                 How to use sprite sheets
               </a>
               <a 
-                href="#" 
+                href="/pricing" 
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
