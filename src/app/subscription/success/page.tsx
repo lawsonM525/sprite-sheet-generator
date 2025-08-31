@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Zap, Crown } from 'lucide-react'
 import Link from 'next/link'
 
-export default function SubscriptionSuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams()
   const [plan, setPlan] = useState<string>('pro')
   
@@ -75,7 +75,7 @@ export default function SubscriptionSuccessPage() {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-medium text-purple-pizzazz">What's included:</h4>
+            <h4 className="font-medium text-purple-pizzazz">What&apos;s included:</h4>
             <ul className="space-y-2">
               {planDetails.features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2 text-sm text-citron-600">
@@ -108,5 +108,25 @@ export default function SubscriptionSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SubscriptionSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-rich-black flex items-center justify-center p-6">
+        <Card className="bg-rich-black-200 border-rich-black-400 max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <div className="animate-pulse">
+              <div className="w-16 h-16 bg-rich-black-300 rounded-full mx-auto mb-4"></div>
+              <div className="h-6 bg-rich-black-300 rounded w-3/4 mx-auto mb-2"></div>
+              <div className="h-4 bg-rich-black-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   )
 }
