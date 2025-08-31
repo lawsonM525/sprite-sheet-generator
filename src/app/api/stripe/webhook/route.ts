@@ -30,8 +30,14 @@ export async function POST(request: NextRequest) {
 
     // Helper function to determine plan from price ID
     const getPlanFromPriceId = (priceId: string): string => {
+      console.log(`Checking price ID: ${priceId}`)
+      console.log(`PRO_PRICE_ID: ${process.env.STRIPE_PRO_PRICE_ID}`)
+      console.log(`PREMIUM_PRICE_ID: ${process.env.STRIPE_PREMIUM_PRICE_ID}`)
+      
       if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro'
       if (priceId === process.env.STRIPE_PREMIUM_PRICE_ID) return 'premium'
+      
+      console.log(`No matching price ID found, defaulting to 'free'`)
       return 'free'
     }
 
@@ -41,9 +47,34 @@ export async function POST(request: NextRequest) {
       console.log(`Database name: ${db.databaseName}`)
       console.log(`Collection: users`)
       
+      // Transform updates to match the expected subscription structure
+      const subscriptionUpdates: any = {}
+      
+      if (updates.plan) {
+        subscriptionUpdates['subscription.planId'] = updates.plan
+        subscriptionUpdates['subscription.status'] = updates.planStatus || 'active'
+      }
+      if (updates.planStatus) {
+        subscriptionUpdates['subscription.status'] = updates.planStatus
+      }
+      if (updates.stripeCustomerId) {
+        subscriptionUpdates['subscription.stripeCustomerId'] = updates.stripeCustomerId
+      }
+      if (updates.subscriptionId) {
+        subscriptionUpdates['subscription.stripeSubscriptionId'] = updates.subscriptionId
+      }
+      
+      // Add any other direct updates
+      const finalUpdates = {
+        ...subscriptionUpdates,
+        updatedAt: new Date()
+      }
+      
+      console.log(`Final database updates:`, finalUpdates)
+      
       const result = await db.collection('users').updateOne(
         { email },
-        { $set: { ...updates, updatedAt: new Date() } },
+        { $set: finalUpdates },
         { upsert: true }
       )
       console.log(`Database update result:`, result)

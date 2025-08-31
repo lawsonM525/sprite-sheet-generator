@@ -11,22 +11,24 @@ interface SpriteAnimationProps {
   alt: string
   size?: number
   speed?: number
+  gridSize?: number
 }
 
-function SpriteAnimation({ src, alt, size = 64, speed = 150 }: SpriteAnimationProps) {
+function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: SpriteAnimationProps) {
   const [currentFrame, setCurrentFrame] = useState(0)
+  const totalFrames = gridSize * gridSize
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % 9) // 9 frames for 3x3 grid
+      setCurrentFrame((prev) => (prev + 1) % totalFrames)
     }, speed)
 
     return () => clearInterval(interval)
-  }, [speed])
+  }, [speed, totalFrames])
 
-  // Calculate frame position (3x3 grid)
-  const row = Math.floor(currentFrame / 3)
-  const col = currentFrame % 3
+  // Calculate frame position
+  const row = Math.floor(currentFrame / gridSize)
+  const col = currentFrame % gridSize
   
   return (
     <div
@@ -35,7 +37,7 @@ function SpriteAnimation({ src, alt, size = 64, speed = 150 }: SpriteAnimationPr
         width: size,
         height: size,
         backgroundImage: `url(${src})`,
-        backgroundSize: `${size * 3}px ${size * 3}px`,
+        backgroundSize: `${size * gridSize}px ${size * gridSize}px`,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: `-${col * size}px -${row * size}px`,
         imageRendering: 'pixelated'
@@ -147,14 +149,39 @@ export default function HowToUseSpriteSheets() {
                 Perfect for simple animations like a blinking eye or a bouncing ball. 
                 Four pictures arranged in a square give you a short, smooth loop.
               </p>
-              <div className="bg-rich-black-300 p-3 sm:p-4 rounded-lg">
-                <div className="grid grid-cols-2 gap-2 w-24 sm:w-32 mx-auto">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm sm:text-base">1</div>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm sm:text-base">2</div>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm sm:text-base">3</div>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm sm:text-base">4</div>
+              <div className="bg-rich-black-300 p-4 rounded-lg">
+                <div className="flex items-center justify-center gap-6 mb-4">
+                  <div className="text-center">
+                    <div className="grid grid-cols-2 gap-2 w-24 mx-auto mb-2">
+                      <div className="w-10 h-10 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm">1</div>
+                      <div className="w-10 h-10 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm">2</div>
+                      <div className="w-10 h-10 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm">3</div>
+                      <div className="w-10 h-10 bg-purple-pizzazz-200 rounded flex items-center justify-center text-rich-black font-bold text-sm">4</div>
+                    </div>
+                    <p className="text-citron-500 text-sm">Grid Layout</p>
+                  </div>
+                  <div className="text-center">
+                    <Image 
+                      src="/sample-sprites/blinking-blue-eye-2x2.png" 
+                      alt="Blinking blue eye sprite sheet - 2x2 grid with 4 frames"
+                      width={120}
+                      height={120}
+                      className="border border-rich-black-400 rounded mb-2"
+                    />
+                    <p className="text-citron-500 text-sm">Real Example</p>
+                  </div>
+                  <div className="text-center">
+                    <SpriteAnimation 
+                      src="/sample-sprites/blinking-blue-eye-2x2.png"
+                      alt="Blinking blue eye animation"
+                      size={120}
+                      speed={200}
+                      gridSize={2}
+                    />
+                    <p className="text-citron-500 text-sm">Animated Version</p>
+                  </div>
                 </div>
-                <p className="text-center mt-2 text-citron-500">2x2 Grid = 4 animation frames</p>
+                <p className="text-center text-citron-500">2x2 Grid = 4 animation frames</p>
               </div>
             </div>
 
@@ -249,32 +276,33 @@ export default function HowToUseSpriteSheets() {
             <div className="bg-rich-black-300 p-6 rounded-lg">
               <h4 className="text-lg text-purple-pizzazz mb-3">Method 2: JavaScript Frame Control (Recommended)</h4>
               <pre className="bg-rich-black text-citron-400 p-4 rounded text-sm overflow-x-auto">
-{`function SpriteAnimation({ src, size = 64, speed = 150 }) {
+{`function SpriteAnimation({ src, size = 64, speed = 150, gridSize = 3 }) {
   const [currentFrame, setCurrentFrame] = useState(0)
+  const totalFrames = gridSize * gridSize
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % 9) // 9 frames
+      setCurrentFrame((prev) => (prev + 1) % totalFrames)
     }, speed)
     return () => clearInterval(interval)
-  }, [speed])
+  }, [speed, totalFrames])
 
-  const row = Math.floor(currentFrame / 3)
-  const col = currentFrame % 3
+  const row = Math.floor(currentFrame / gridSize)
+  const col = currentFrame % gridSize
   
   return (
     <div style={{
       width: size,
       height: size,
       backgroundImage: \`url(\${src})\`,
-      backgroundSize: \`\${size * 3}px \${size * 3}px\`,
+      backgroundSize: \`\${size * gridSize}px \${size * gridSize}px\`,
       backgroundPosition: \`-\${col * size}px -\${row * size}px\`
     }} />
   )
 }`}
               </pre>
               <p className="text-citron-500 mt-3">
-                JavaScript gives you exact frame control, variable speeds, and the ability to pause, reverse, or trigger animations based on user actions.
+                JavaScript gives you exact frame control, variable speeds, and works with any grid size (2x2, 3x3, 4x4). Perfect for pause, reverse, or trigger animations based on user actions.
               </p>
             </div>
           </CardContent>
@@ -344,18 +372,18 @@ export default function HowToUseSpriteSheets() {
           </CardHeader>
           <CardContent className="text-citron-600 space-y-8">
             <p className="text-lg leading-relaxed">
-              Here are actual 3x3 sprite sheets created with our AI generator. Each one has 9 frames that create smooth animations when used with CSS!
+              Here are actual sprite sheets created with our AI generator. Different grid sizes create different animation styles - from simple 2x2 blinking to complex 3x3 movements!
             </p>
             
             <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Blinking Eye Example */}
+              {/* Blinking Blue Eye Example */}
               <div className="bg-rich-black-300 p-6 rounded-lg">
-                <h4 className="text-lg text-purple-pizzazz mb-4 text-center">Blinking Eye</h4>
+                <h4 className="text-lg text-purple-pizzazz mb-4 text-center">Blinking Blue Eye</h4>
                 <div className="flex items-center justify-center gap-6">
                   <div className="text-center">
                     <Image 
-                      src="/sample-sprites/blinking-eye.png" 
-                      alt="Blinking eye sprite sheet - 3x3 grid with 9 frames"
+                      src="/sample-sprites/blinking-blue-eye-2x2.png" 
+                      alt="Blinking blue eye sprite sheet - 2x2 grid with 4 frames"
                       width={150}
                       height={150}
                       className="border border-rich-black-400 rounded mb-2"
@@ -364,16 +392,17 @@ export default function HowToUseSpriteSheets() {
                   </div>
                   <div className="text-center">
                     <SpriteAnimation 
-                      src="/sample-sprites/blinking-eye.png"
-                      alt="Blinking eye animation"
+                      src="/sample-sprites/blinking-blue-eye-2x2.png"
+                      alt="Blinking blue eye animation"
                       size={150}
                       speed={200}
+                      gridSize={2}
                     />
                     <p className="text-citron-500 text-xs mt-2">Animated Result</p>
                   </div>
                 </div>
                 <div className="bg-rich-black text-citron-400 p-2 rounded text-xs text-center mt-3">
-                  <code>JavaScript: setCurrentFrame((prev) =&gt; (prev + 1) % 9)</code>
+                  <code>JavaScript: setCurrentFrame((prev) =&gt; (prev + 1) % 4)</code>
                 </div>
               </div>
 

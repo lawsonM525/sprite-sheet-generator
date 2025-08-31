@@ -12,6 +12,8 @@ const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     })
   ],
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async jwt({ token, account, profile }: any) {
       if (account && profile) {
@@ -72,8 +74,16 @@ const authOptions = {
   },
   events: {
     async signIn({ user, account, profile }: any) {
-      // Update last login time
+      // Update last login time and log OAuth usage
       if (account?.provider === 'google') {
+        console.log(`Google OAuth sign-in successful for: ${user.email}`)
+        console.log(`OAuth Client ID used: ${process.env.GOOGLE_CLIENT_ID}`)
+        console.log(`Account details:`, {
+          provider: account.provider,
+          type: account.type,
+          providerAccountId: account.providerAccountId
+        })
+        
         await db.collection('users').updateOne(
           { email: user.email },
           { $set: { lastLoginAt: new Date().toISOString() } }
