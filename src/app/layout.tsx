@@ -18,6 +18,22 @@ export const metadata: Metadata = {
     title: 'Sprite Sheet Generator',
     description: 'AI-powered sprite sheet creation for animations',
     type: 'website',
+    url: 'https://sprite-sheet-generator.com',
+    siteName: 'Sprite Sheet Generator',
+    images: [
+      {
+        url: 'https://sprite-sheet-generator.com/og/home.png',
+        width: 1200,
+        height: 630,
+        alt: 'Sprite Sheet Generator preview image',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@SpriteSheetGen',
+    creator: '@SpriteSheetGen',
+    images: ['https://sprite-sheet-generator.com/og/home.png'],
   },
   icons: {
     icon: [
