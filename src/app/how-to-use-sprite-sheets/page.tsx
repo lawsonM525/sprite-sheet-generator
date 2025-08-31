@@ -4,8 +4,48 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
-import { SpriteAnimation } from '@/components/SpriteAnimation'
+import { useState, useEffect } from 'react'
+
+interface SpriteAnimationProps {
+  src: string
+  alt: string
+  size?: number
+  speed?: number
+  gridSize?: number
+}
+
+function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: SpriteAnimationProps) {
+  const [currentFrame, setCurrentFrame] = useState(0)
+  const totalFrames = gridSize * gridSize
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % totalFrames)
+    }, speed)
+
+    return () => clearInterval(interval)
+  }, [speed, totalFrames])
+
+  // Calculate frame position
+  const row = Math.floor(currentFrame / gridSize)
+  const col = currentFrame % gridSize
+  
+  return (
+    <div
+      className="border border-rich-black-400 rounded"
+      style={{
+        width: size,
+        height: size,
+        backgroundImage: `url(${src})`,
+        backgroundSize: `${size * gridSize}px ${size * gridSize}px`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: `-${col * size}px -${row * size}px`,
+        imageRendering: 'pixelated'
+      }}
+      title={alt}
+    />
+  )
+}
 
 export default function HowToUseSpriteSheets() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

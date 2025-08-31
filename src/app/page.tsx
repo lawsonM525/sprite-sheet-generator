@@ -13,7 +13,6 @@ import { SpritePreview } from '@/components/SpritePreview'
 import { ProgressBar } from '@/components/ProgressBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
-import { SpriteAnimation } from '@/components/SpriteAnimation'
 
 const TEMPLATES = [
   { value: 'growing-star', label: 'Growing Star', description: 'A star that expands from small to large' },
@@ -176,54 +175,15 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="text-center py-16 px-4">
-
+     
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-mimi-pink-500 mb-6">
           Sprite Sheet Generator
         </h1>
         <p className="text-lg sm:text-xl text-citron-600 max-w-3xl mx-auto leading-relaxed px-4">
-          Create perfect sprite sheets with guaranteed character consistency. Our AI ensures
-          your character maintains the same dimensions and appearance across all frames,
+          Create perfect sprite sheets with guaranteed character consistency. Our AI ensures 
+          your character maintains the same dimensions and appearance across all frames, 
           making it easy to use for CSS animations and game development.
         </p>
-      </div>
-
-      {/* Sample Animated Sprites */}
-      <div className="bg-rich-black-200 py-8">
-        <div className="overflow-x-auto">
-          <div className="flex items-center gap-6 px-4 w-max">
-            <SpriteAnimation
-              src="/sample-sprites/blinking-blue-eye-2x2.png"
-              alt="Blinking blue eye animation"
-              size={96}
-              speed={200}
-              gridSize={2}
-            />
-            <SpriteAnimation
-              src="/sample-sprites/smiling-emoji.png"
-              alt="Smiling emoji animation"
-              size={96}
-              speed={220}
-            />
-            <SpriteAnimation
-              src="/sample-sprites/bouncing-ball.png"
-              alt="Bouncing ball animation"
-              size={96}
-              speed={130}
-            />
-            <SpriteAnimation
-              src="/sample-sprites/happy-bird.png"
-              alt="Happy bird animation"
-              size={96}
-              speed={110}
-            />
-            <SpriteAnimation
-              src="/sample-sprites/neon-star.png"
-              alt="Neon star animation"
-              size={96}
-              speed={160}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Main Generator Section */}
