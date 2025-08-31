@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
+import Script from 'next/script'
 import { useState, useEffect } from 'react'
 
 interface SpriteAnimationProps {
@@ -50,10 +51,54 @@ function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: Spr
 export default function HowToUseSpriteSheets() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+  const howToSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Use Sprite Sheets',
+    description:
+      'Learn how to create and animate sprite sheets for your games and web projects.',
+    image: '/sample-sprites/smiling-emoji.png',
+    step: [
+      {
+        '@type': 'HowToStep',
+        name: 'Create Your Sprite Sheet',
+        text:
+          'Use our AI generator to make a sprite sheet with consistent characters. Choose your grid size based on how smooth you want the animation.',
+        image: '/sample-sprites/happy-bird.png'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Add to Your Website',
+        text:
+          'Upload the sprite sheet image to your website and add it to your HTML with a simple image tag or CSS background.',
+        image: '/sample-sprites/bouncing-ball.png'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Write the CSS Animation',
+        text:
+          'Copy our CSS code examples and adjust the timing and frame count to match your sprite sheet.',
+        image: '/sample-sprites/blinking-eye.png'
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Test and Enjoy',
+        text:
+          'Refresh your website and watch your character come to life! Adjust the speed if needed.',
+        image: '/sample-sprites/neon-star.png'
+      }
+    ]
+  }
+
   return (
     <div className="min-h-screen bg-rich-black">
+      <Script
+        id="howto-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       {/* Navigation */}
-      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
+        <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/pink-sprinkles.gif" 

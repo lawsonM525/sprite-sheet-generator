@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Check, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import Script from 'next/script'
 import { useState } from 'react'
 
 export default function PricingPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const plans = [
+    const plans = [
     {
       name: 'Free',
       price: '$0',
@@ -76,12 +77,34 @@ export default function PricingPage() {
       buttonVariant: 'default' as const,
       popular: false
     }
-  ]
+    ]
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: plans.map((plan, index) => ({
+      '@type': 'Product',
+      name: `${plan.name} Plan`,
+      description: plan.description,
+      offers: {
+        '@type': 'Offer',
+        price: plan.price.replace('$', ''),
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock'
+      },
+      position: index + 1
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-rich-black">
+      <Script
+        id="pricing-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       {/* Navigation */}
-      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
+        <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/pink-sprinkles.gif" 
