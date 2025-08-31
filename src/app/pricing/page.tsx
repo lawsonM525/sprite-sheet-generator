@@ -1,11 +1,37 @@
 'use client'
 
+import type { Metadata } from 'next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Pricing - Sprite Sheet Generator',
+  description:
+    'Compare free, Pro, and Premium plans for the Sprite Sheet Generator and choose the right option for AI-powered sprite sheet creation.',
+  openGraph: {
+    title: 'Sprite Sheet Generator Pricing Plans',
+    description:
+      'Explore free, Pro, and Premium plans for the AI Sprite Sheet Generator and power up your animation workflow.',
+    url: 'https://sprite-sheet-generator.com/pricing',
+    siteName: 'Sprite Sheet Generator',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sprite Sheet Generator Pricing',
+    description:
+      'Discover free, Pro, and Premium plans for the AI-powered sprite sheet creator.',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+  },
+  alternates: {
+    canonical: 'https://sprite-sheet-generator.com/pricing',
+  },
+}
 
 export default function PricingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

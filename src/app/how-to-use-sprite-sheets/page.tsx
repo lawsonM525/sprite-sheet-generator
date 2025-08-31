@@ -1,10 +1,36 @@
 'use client'
 
+import type { Metadata } from 'next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+
+export const metadata: Metadata = {
+  title: 'How to Use Sprite Sheets - Sprite Sheet Generator',
+  description:
+    'Step-by-step guide to creating, animating, and implementing sprite sheets for games and web apps using the Sprite Sheet Generator.',
+  openGraph: {
+    title: 'How to Use Sprite Sheets',
+    description:
+      'Learn to create and animate sprite sheets for games, websites, and CSS animations with our AI-powered Sprite Sheet Generator guide.',
+    url: 'https://sprite-sheet-generator.com/how-to-use-sprite-sheets',
+    siteName: 'Sprite Sheet Generator',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+    type: 'article',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How to Use Sprite Sheets',
+    description:
+      'Follow this tutorial to build and animate sprite sheets with the AI Sprite Sheet Generator.',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+  },
+  alternates: {
+    canonical: 'https://sprite-sheet-generator.com/how-to-use-sprite-sheets',
+  },
+}
 
 interface SpriteAnimationProps {
   src: string

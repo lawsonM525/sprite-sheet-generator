@@ -1,5 +1,6 @@
 'use client'
 
+import type { Metadata } from 'next'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +9,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Crown, User, Calendar, Zap, History, CreditCard } from 'lucide-react'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Account - Sprite Sheet Generator',
+  description:
+    'Manage your Sprite Sheet Generator profile, subscription preferences, and sprite sheet generation history.',
+  openGraph: {
+    title: 'Account Dashboard - Sprite Sheet Generator',
+    description:
+      'Access your profile, subscription, usage stats, and project history for the AI-powered Sprite Sheet Generator.',
+    url: 'https://sprite-sheet-generator.com/account',
+    siteName: 'Sprite Sheet Generator',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Account - Sprite Sheet Generator',
+    description:
+      'View your profile, manage subscription plans, and track sprite sheet generation usage.',
+    images: ['https://sprite-sheet-generator.com/pink-sprinkles.gif'],
+  },
+  alternates: {
+    canonical: 'https://sprite-sheet-generator.com/account',
+  },
+}
 
 export default function AccountPage() {
   const { user, loading } = useAuth()
