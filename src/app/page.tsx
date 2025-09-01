@@ -16,6 +16,7 @@ import { Footer } from '@/components/Footer'
 import { SpriteAnimation } from '@/components/SpriteAnimation'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSession } from 'next-auth/react'
 
 const TEMPLATES = [
   { 
@@ -54,6 +55,7 @@ const STYLES = [
 
 export default function Home() {
   const { user } = useAuth()
+  const { update } = useSession()
   const [concept, setConcept] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [selectedStyle, setSelectedStyle] = useState('pixel-art')

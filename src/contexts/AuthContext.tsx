@@ -34,7 +34,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function AuthProviderInner({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const [user, setUser] = useState<User | null>(null)
   const loading = status === 'loading'
 
@@ -65,6 +65,17 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       setUser(null)
     }
   }, [session])
+
+  // Auto-refresh session every 2 minutes to get fresh subscription data
+  useEffect(() => {
+    if (session?.user) {
+      const interval = setInterval(() => {
+        update()
+      }, 2 * 60 * 1000) // 2 minutes
+
+      return () => clearInterval(interval)
+    }
+  }, [session, update])
 
   const signInWithGoogle = async () => {
     await signIn('google', { callbackUrl: '/' })

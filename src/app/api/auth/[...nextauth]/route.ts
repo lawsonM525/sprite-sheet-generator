@@ -49,6 +49,10 @@ const authOptions = {
       }
     })
   ],
+  session: {
+    strategy: 'jwt' as const,
+    maxAge: 5 * 60, // 5 minutes - short session for fresh subscription data
+  },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true, // Enable debug in production temporarily
   callbacks: {
@@ -115,21 +119,32 @@ const authOptions = {
           // Connect to MongoDB
           const { db } = await connectToDatabase()
           
+          if (!db) {
+            throw new Error('Database connection failed')
+          }
+          
           // Fetch latest user data from database
           const user = await db.collection('users').findOne({ _id: new ObjectId(token.userId) })
           
           if (user) {
             session.user.id = user._id.toString()
-            session.user.subscription = user.subscription
-            session.user.usage = user.usage
-            session.user.role = user.role
+            session.user.subscription = user.subscription || { status: 'free', planId: 'free' }
+            session.user.usage = user.usage || { totalGenerations: 0, monthlyGenerations: 0, lastResetDate: new Date().toISOString() }
+            session.user.role = user.role || 'user'
+            
+            console.log('Session callback - User subscription data:', {
+              email: user.email,
+              planId: user.subscription?.planId,
+              status: user.subscription?.status,
+              stripeCustomerId: user.subscription?.stripeCustomerId
+            })
           }
         } catch (error) {
           console.error('Session callback MongoDB error:', error)
           // Use token data as fallback
           session.user.id = token.userId
           session.user.subscription = token.subscription || { status: 'free', planId: 'free' }
-          session.user.usage = token.usage || { totalGenerations: 0, monthlyGenerations: 0 }
+          session.user.usage = token.usage || { totalGenerations: 0, monthlyGenerations: 0, lastResetDate: new Date().toISOString() }
           session.user.role = 'user'
         }
       }
@@ -167,9 +182,6 @@ const authOptions = {
       }
       console.log('=== END SIGN-IN EVENT ===')
     }
-  },
-  session: {
-    strategy: "jwt" as const, // Use JWT instead of database sessions
   },
 }
 
