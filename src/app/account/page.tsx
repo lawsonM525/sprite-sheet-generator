@@ -42,19 +42,19 @@ export default function AccountPage() {
   }
 
   const getSubscriptionBadge = () => {
-    const status = user.subscription.status
-    if (status === 'free') return { label: 'Free', className: 'bg-gray-100 text-gray-800' }
+    const planId = user.subscription.planId
+    if (planId === 'free') return { label: 'Free', className: 'bg-gray-100 text-gray-800' }
     
     const variants = {
       premium: { label: 'Premium', className: 'bg-blue-100 text-blue-800' },
       pro: { label: 'Pro', className: 'bg-purple-100 text-purple-800' }
     }
     
-    return variants[status as keyof typeof variants] || { label: 'Free', className: 'bg-gray-100 text-gray-800' }
+    return variants[planId as keyof typeof variants] || { label: 'Free', className: 'bg-gray-100 text-gray-800' }
   }
 
   const getUsageLimit = () => {
-    switch (user.subscription.status) {
+    switch (user.subscription.planId) {
       case 'free': return 5
       case 'premium': return 50
       case 'pro': return 1000
@@ -105,7 +105,7 @@ export default function AccountPage() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Subscription</span>
                 <Badge className={getSubscriptionBadge().className}>
-                  {user.subscription.status !== 'free' && <Crown className="w-3 h-3 mr-1" />}
+                  {user.subscription.planId !== 'free' && <Crown className="w-3 h-3 mr-1" />}
                   {getSubscriptionBadge().label}
                 </Badge>
               </div>
@@ -148,7 +148,7 @@ export default function AccountPage() {
               </div>
             </div>
 
-            {user.subscription.status === 'free' && usagePercentage > 80 && (
+            {user.subscription.planId === 'free' && usagePercentage > 80 && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                 <p className="text-sm text-orange-800">
                   You&apos;re approaching your monthly limit. 
@@ -193,7 +193,7 @@ export default function AccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {user.subscription.status === 'free' ? (
+            {user.subscription.planId === 'free' ? (
               <div>
                 <p className="text-sm text-muted-foreground mb-3">
                   Upgrade to unlock more frames, higher resolutions, and priority generation.

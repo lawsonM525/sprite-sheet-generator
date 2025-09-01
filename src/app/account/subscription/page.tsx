@@ -60,6 +60,8 @@ export default function SubscriptionPage() {
       if (response.ok) {
         const { url } = await response.json()
         window.open(url, '_blank')
+      } else {
+        console.error('Portal session creation failed:', response.status, await response.text())
       }
     } catch (error) {
       console.error('Failed to create portal session:', error)

@@ -8,13 +8,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Download, Sparkles, Grid3x3, Zap } from 'lucide-react'
+import { Loader2, Download, Sparkles, Grid3x3, Zap, Crown } from 'lucide-react'
 import { SpritePreview } from '@/components/SpritePreview'
 import { ProgressBar } from '@/components/ProgressBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { Footer } from '@/components/Footer'
 import { SpriteAnimation } from '@/components/SpriteAnimation'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
+import { useAuth } from '@/contexts/AuthContext'
 
 const TEMPLATES = [
   { 
@@ -52,6 +53,7 @@ const STYLES = [
 ]
 
 export default function Home() {
+  const { user } = useAuth()
   const [concept, setConcept] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
   const [selectedStyle, setSelectedStyle] = useState('pixel-art')
@@ -84,6 +86,27 @@ export default function Home() {
   const removeReferenceImage = () => {
     setReferenceImage(null)
     setReferenceImagePreview(null)
+  }
+
+  const getUsageLimit = () => {
+    switch (user?.subscription.planId) {
+      case 'pro': return 1000
+      case 'premium': return 50
+      default: return 3
+    }
+  }
+
+  const getUsageDisplay = () => {
+    if (!user) return '0/3 Uses Today'
+    
+    const limit = getUsageLimit()
+    const used = user.usage.monthlyGenerations
+    
+    if (user.subscription.planId === 'free') {
+      return `${used}/3 Uses Today`
+    } else {
+      return `${used}/${limit} Uses This Month`
+    }
   }
 
   const handleGenerate = async () => {
@@ -144,6 +167,23 @@ export default function Home() {
             unoptimized
           />
           <span className="text-lg sm:text-xl font-bold text-mimi-pink-500">Sprite Sheet Generator</span>
+          {user?.subscription.planId === 'pro' && (
+            <div className="relative">
+              <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-2 py-1 rounded-md text-xs font-bold shadow-lg animate-pulse">
+                PRO
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-md blur-sm opacity-50 animate-ping"></div>
+            </div>
+          )}
+          {user?.subscription.planId === 'premium' && (
+            <div className="relative">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-1 rounded-md text-xs font-bold shadow-lg">
+                <Crown className="w-3 h-3 inline mr-1" />
+                PREMIUM
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-md blur-sm opacity-50 animate-pulse"></div>
+            </div>
+          )}
         </div>
         
         {/* Desktop Menu */}
@@ -377,7 +417,7 @@ export default function Home() {
                   )}
 
                   <div className="text-center text-sm text-citron-500">
-                    <span>0/3 Uses Today</span>
+                    <span>{getUsageDisplay()}</span>
                     <br />
                     <span>By continuing you agree to our </span>
                     <a href="#" className="text-violet underline">Terms and conditions</a>
