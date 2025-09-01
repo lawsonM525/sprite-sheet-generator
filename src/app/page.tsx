@@ -28,12 +28,12 @@ const TEMPLATES = [
     speed: 400
   },
   { 
-    value: 'walking-cycle', 
-    label: 'Walking Cycle', 
-    description: 'Simple character walk animation',
-    sprite: '/sample-sprites/walking-girl-3x3.png',
+    value: 'twirling-ballerina', 
+    label: 'Twirling Ballerina', 
+    description: 'Elegant spinning dancer animation',
+    sprite: '/sample-sprites/ballerina-3x3.png',
     gridSize: { rows: 3, cols: 3 },
-    speed: 100
+    speed: 120
   },
   { 
     value: 'flame', 
@@ -43,6 +43,19 @@ const TEMPLATES = [
     gridSize: { rows: 2, cols: 2 },
     speed: 600
   },
+]
+
+// Additional showcase examples sourced from public/sample-sprites
+const SAMPLE_SPRITES = [
+  { label: 'Twirling Ballerina', src: '/sample-sprites/ballerina-3x3.png', gridSize: { rows: 3, cols: 3 }, speed: 150 },
+  { label: 'Blinking Blue Eye', src: '/sample-sprites/blinking-blue-eye-2x2.png', gridSize: { rows: 2, cols: 2 }, speed: 400 },
+  { label: 'Blinking Eye', src: '/sample-sprites/blinking-eye.png', gridSize: { rows: 3, cols: 3 }, speed: 400 },
+  { label: 'Bouncing Ball', src: '/sample-sprites/bouncing-ball.png', gridSize: { rows: 3, cols: 3 }, speed: 300 },
+  { label: 'Flame', src: '/sample-sprites/fire-2x2.png', gridSize: { rows: 2, cols: 2 }, speed: 600 },
+  { label: 'Happy Bird', src: '/sample-sprites/happy-bird.png', gridSize: { rows: 3, cols: 3 }, speed: 200 },
+  { label: 'Neon Star', src: '/sample-sprites/neon-star.png', gridSize: { rows: 3, cols: 3 }, speed: 200 },
+  { label: 'Smiling Emoji', src: '/sample-sprites/smiling-emoji.png', gridSize: { rows: 3, cols: 3 }, speed: 200 },
+  { label: 'Walking Girl', src: '/sample-sprites/walking-girl-3x3.png', gridSize: { rows: 3, cols: 3 }, speed: 100 },
 ]
 
 const STYLES = [
@@ -526,6 +539,35 @@ export default function Home() {
                   Use This Template
                 </Button>
               </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Sample Sprites Section */}
+      <div className="max-w-6xl mx-auto px-4 pb-16">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-mimi-pink-500 mb-4">Sample Sprites</h2>
+          <p className="text-citron-600 px-4">Built-in examples from the sample sprite gallery</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {SAMPLE_SPRITES.map((item) => (
+            <Card key={item.src} className="bg-rich-black-200 border-rich-black-400">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl text-mimi-pink-500">{item.label}</CardTitle>
+              </CardHeader>
+              <div className="px-4 sm:px-6 pb-6">
+                <div className="bg-rich-black-300 rounded-lg p-6 flex justify-center">
+                  <SpriteAnimation
+                    src={item.src}
+                    frameCount={item.gridSize.rows * item.gridSize.cols}
+                    size={160}
+                    speed={item.speed}
+                    gridSize={item.gridSize}
+                  />
+                </div>
+              </div>
             </Card>
           ))}
         </div>

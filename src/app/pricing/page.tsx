@@ -1,11 +1,15 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, Crown, Zap, X } from 'lucide-react'
 import { Footer } from '@/components/Footer'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function PricingPage() {
+  const { user } = useAuth()
+  const currentPlan: string = (user as any)?.subscription?.planId || 'free'
   const plans = [
     {
       name: 'Free',
@@ -14,7 +18,7 @@ export default function PricingPage() {
       description: 'Perfect for trying out sprite sheet generation',
       features: [
         '3 generations per week',
-        'All art styles',
+        'All preset art styles',
         'Basic grid sizes (2x2, 3x3)',
         'Basic download formats',
         'Community support'
@@ -36,15 +40,16 @@ export default function PricingPage() {
       description: 'Great for regular creators and small projects',
       features: [
         '30 generations per month',
-        'All art styles',
+        'All preset art styles',
         'All grid sizes (2x2, 3x3, 4x4, 5x5)',
         'High-quality downloads',
-        'Priority email support',
         'Background removal',
         'CSS animation export'
       ],
       limitations: [
-        'No custom grid sizes'
+        'No custom grid sizes',
+        'No custom art styles',
+        'No unlimited generations'
       ],
       buttonText: 'Start Pro Trial',
       buttonVariant: 'default' as const,
@@ -58,11 +63,12 @@ export default function PricingPage() {
       features: [
         'Unlimited generations',
         'All art styles',
+        'Custom art styles',
         'All grid sizes (2x2, 3x3, 4x4, 5x5)',
         'Custom grid sizes (any layout)',
         'Bulk generation',
         'Premium download formats',
-        'Priority support & Discord access',
+        'Priority email support',
         'Background removal',
         'Advanced CSS/JS export',
         'API access (coming soon)'
@@ -146,47 +152,71 @@ export default function PricingPage() {
                     </div>
                   )}
 
-                  {plan.name === 'Pro' ? (
-                    <a href="https://buy.stripe.com/aFaaEY2had2E5P66ybawo02" target="_blank" rel="noopener noreferrer">
-                      <Button 
-                        variant={plan.buttonVariant}
-                        className={`w-full ${
-                          plan.buttonVariant === 'default' 
-                            ? 'bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white' 
-                            : 'border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white'
-                        }`}
-                        size="lg"
-                      >
+                  {/* Button logic based on current plan */}
+                  {(() => {
+                    const baseClasses = `w-full ${
+                      plan.buttonVariant === 'default' 
+                        ? 'bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white' 
+                        : 'border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white'
+                    }`
+
+                    if (plan.name === 'Pro') {
+                      if (currentPlan === 'pro') {
+                        return (
+                          <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
+                            You're already a Pro user
+                          </Button>
+                        )
+                      }
+                      if (currentPlan === 'premium') {
+                        return (
+                          <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
+                            You're already a Premium user
+                          </Button>
+                        )
+                      }
+                      return (
+                        <a href="https://buy.stripe.com/aFaaEY2had2E5P66ybawo02" target="_blank" rel="noopener noreferrer">
+                          <Button variant={plan.buttonVariant} className={baseClasses} size="lg">
+                            {plan.buttonText}
+                          </Button>
+                        </a>
+                      )
+                    }
+
+                    if (plan.name === 'Premium') {
+                      if (currentPlan === 'premium') {
+                        return (
+                          <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
+                            You're already a Premium user
+                          </Button>
+                        )
+                      }
+                      if (currentPlan === 'pro') {
+                        return (
+                          <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
+                            <Button variant={plan.buttonVariant} className={baseClasses} size="lg">
+                              Upgrade to Premium
+                            </Button>
+                          </a>
+                        )
+                      }
+                      return (
+                        <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
+                          <Button variant={plan.buttonVariant} className={baseClasses} size="lg">
+                            {plan.buttonText}
+                          </Button>
+                        </a>
+                      )
+                    }
+
+                    // Free plan button
+                    return (
+                      <Button variant={plan.buttonVariant} className={baseClasses} size="lg">
                         {plan.buttonText}
                       </Button>
-                    </a>
-                  ) : plan.name === 'Premium' ? (
-                    <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
-                      <Button 
-                        variant={plan.buttonVariant}
-                        className={`w-full ${
-                          plan.buttonVariant === 'default' 
-                            ? 'bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white' 
-                            : 'border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white'
-                        }`}
-                        size="lg"
-                      >
-                        {plan.buttonText}
-                      </Button>
-                    </a>
-                  ) : (
-                    <Button 
-                      variant={plan.buttonVariant}
-                      className={`w-full ${
-                        plan.buttonVariant === 'default' 
-                          ? 'bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white' 
-                          : 'border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white'
-                      }`}
-                      size="lg"
-                    >
-                      {plan.buttonText}
-                    </Button>
-                  )}
+                    )
+                  })()}
                 </div>
               </CardContent>
             </Card>
