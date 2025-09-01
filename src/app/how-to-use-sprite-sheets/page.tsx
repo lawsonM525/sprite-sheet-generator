@@ -1,58 +1,15 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-
-interface SpriteAnimationProps {
-  src: string
-  alt: string
-  size?: number
-  speed?: number
-  gridSize?: number
-}
-
-function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: SpriteAnimationProps) {
-  const [currentFrame, setCurrentFrame] = useState(0)
-  const totalFrames = gridSize * gridSize
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % totalFrames)
-    }, speed)
-
-    return () => clearInterval(interval)
-  }, [speed, totalFrames])
-
-  // Calculate frame position
-  const row = Math.floor(currentFrame / gridSize)
-  const col = currentFrame % gridSize
-  
-  return (
-    <div
-      className="border border-rich-black-400 rounded"
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: `url(${src})`,
-        backgroundSize: `${size * gridSize}px ${size * gridSize}px`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: `-${col * size}px -${row * size}px`,
-        imageRendering: 'pixelated'
-      }}
-      title={alt}
-    />
-  )
-}
+import Navigation from '@/components/Navigation'
+import SpriteAnimation from '@/components/SpriteAnimation'
 
 export default function HowToUseSpriteSheets() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
+codex/create-free-sprite-sheet-generator-page
       <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
         <Link href="/" className="flex items-center gap-2">
           <Image 
@@ -119,6 +76,7 @@ export default function HowToUseSpriteSheets() {
           </div>
         )}
       </nav>
+main
 
       {/* Hero Section */}
       <div className="text-center py-12 sm:py-16 px-4">
