@@ -6,8 +6,8 @@ import Link from 'next/link'
 import Script from 'next/script'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import SpriteAnimation from '@/components/SpriteAnimation'
-
+import { SpriteAnimation } from '@/components/SpriteAnimation'
+import { Footer } from '@/components/Footer'
 
 export default function FreeSpriteSheetGeneratorPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -319,6 +319,8 @@ export default function FreeSpriteSheetGeneratorPage() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </>
   )
 }

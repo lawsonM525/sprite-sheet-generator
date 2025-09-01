@@ -2,8 +2,10 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { UserMenu } from '@/components/auth/UserMenu'
+import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Crown, User, Calendar, Zap, History, CreditCard } from 'lucide-react'
@@ -220,6 +222,8 @@ export default function AccountPage() {
           </CardContent>
         </Card>
       </div>
+      
+      <Footer />
     </div>
   )
 }

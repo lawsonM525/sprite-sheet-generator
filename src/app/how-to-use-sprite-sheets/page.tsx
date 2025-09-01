@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
-import SpriteAnimation from '@/components/SpriteAnimation'
+import { SpriteAnimation } from '@/components/SpriteAnimation'
+import { Footer } from '@/components/Footer'
 
 export default function HowToUseSpriteSheets() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -590,6 +591,8 @@ export default function HowToUseSpriteSheets() {
         </Card>
         </div>
       </div>
+      
+      <Footer />
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Check, Crown, Zap, Settings, CreditCard, Calendar, Users } from 'lucide-react'
 import Link from 'next/link'
+import { Footer } from '@/components/Footer'
 
 interface UserSubscription {
   plan: 'free' | 'pro' | 'premium'
@@ -286,6 +287,8 @@ export default function SubscriptionPage() {
           </Link>
         </div>
       </div>
+      
+      <Footer />
     </div>
   )
 }

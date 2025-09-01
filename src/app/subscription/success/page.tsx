@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Zap, Crown } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
+import { Footer } from '@/components/Footer'
 import Link from 'next/link'
 
 function SuccessContent() {
@@ -33,14 +34,14 @@ function SuccessContent() {
       case 'premium':
         return {
           name: 'Premium',
-          icon: <Crown className="w-8 h-8 text-mimi-pink-500" />,
+          icon: <CheckCircle className="w-8 h-8 text-mimi-pink-500" />,
           color: 'text-mimi-pink-500',
           features: ['Unlimited generations', 'Custom grid sizes', 'Priority support']
         }
       default:
         return {
           name: 'Pro',
-          icon: <Zap className="w-8 h-8 text-purple-pizzazz" />,
+          icon: <CheckCircle className="w-8 h-8 text-purple-pizzazz" />,
           color: 'text-purple-pizzazz',
           features: ['30 generations per month', 'All grid sizes', 'Priority support']
         }
@@ -107,6 +108,8 @@ function SuccessContent() {
           </div>
         </CardContent>
       </Card>
+      
+      <Footer />
     </div>
   )
 }

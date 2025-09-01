@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, X } from 'lucide-react'
+import { Check, Crown, Zap, X } from 'lucide-react'
+import { Footer } from '@/components/Footer'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 
@@ -268,6 +269,8 @@ export default function PricingPage() {
           </Card>
         </div>
       </div>
+      
+      <Footer />
     </div>
   )
 }

@@ -5,8 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import SpriteAnimation from '@/components/SpriteAnimation'
-
+import { SpriteAnimation } from '@/components/SpriteAnimation'
+import { Footer } from '@/components/Footer'
 
 const faqData = {
   "@context": "https://schema.org",
@@ -495,6 +495,8 @@ function create() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqData) }}
       />
+      
+      <Footer />
     </div>
   )
 }

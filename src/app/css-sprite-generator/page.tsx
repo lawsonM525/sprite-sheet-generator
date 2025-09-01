@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Navigation from '@/components/Navigation'
+import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -51,6 +53,7 @@ export default function CssSpriteGeneratorPage() {
 
   return (
     <div className="min-h-screen bg-rich-black text-citron-600 px-4 py-8">
+      <Navigation />
       <h1 className="text-3xl md:text-4xl font-bold text-mimi-pink-500 mb-4">
         CSS Sprite Generator
       </h1>
@@ -150,6 +153,7 @@ export default function CssSpriteGeneratorPage() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <Footer />
     </div>
   )
 }
