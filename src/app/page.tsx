@@ -437,7 +437,7 @@ export default function Home() {
                     <span>{getUsageDisplay()}</span>
                     <br />
                     <span>By continuing you agree to our </span>
-                    <a href="#" className="text-violet underline">Terms and conditions</a>
+                    <a href="/terms" className="text-violet underline">Terms and Conditions</a>
                   </div>
                 </div>
               </CardContent>
