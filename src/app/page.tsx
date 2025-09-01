@@ -449,6 +449,42 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-rich-black-300 mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8 flex flex-wrap justify-center gap-6 text-purple-pizzazz">
+          <a
+            href="/ai-sprite-generator"
+            className="hover:text-citron-500 transition-colors"
+          >
+            AI Sprite Sheet Generation
+          </a>
+          <a
+            href="/game-engine-sprite-sheets"
+            className="hover:text-citron-500 transition-colors"
+          >
+            Sprite Sheets for Game Devs
+          </a>
+          <a
+            href="/free-sprite-sheet-generator"
+            className="hover:text-citron-500 transition-colors"
+          >
+            Free Sprite Sheet Generator
+          </a>
+          <a
+            href="/how-to-use-sprite-sheets"
+            className="hover:text-citron-500 transition-colors"
+          >
+            How to use sprite sheets
+          </a>
+          <a
+            href="/pricing"
+            className="hover:text-citron-500 transition-colors"
+          >
+            Pricing
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
