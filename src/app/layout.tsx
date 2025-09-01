@@ -18,6 +18,13 @@ export const metadata: Metadata = {
     title: 'Sprite Sheet Generator',
     description: 'AI-powered sprite sheet creation for animations',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   icons: {
     icon: [

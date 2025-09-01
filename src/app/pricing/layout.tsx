@@ -9,6 +9,13 @@ export const metadata: Metadata = {
     description: 'Simple, transparent pricing for AI-powered sprite sheet generation. Start free and upgrade as you grow.',
     type: 'website',
     url: 'https://sprite-sheet-generator.com/pricing',
+    images: [
+      {
+        url: '/pricing/opengraph-image',
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
