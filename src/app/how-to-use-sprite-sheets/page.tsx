@@ -1,114 +1,15 @@
-'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-
-interface SpriteAnimationProps {
-  src: string
-  alt: string
-  size?: number
-  speed?: number
-  gridSize?: number
-}
-
-function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: SpriteAnimationProps) {
-  const [currentFrame, setCurrentFrame] = useState(0)
-  const totalFrames = gridSize * gridSize
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % totalFrames)
-    }, speed)
-
-    return () => clearInterval(interval)
-  }, [speed, totalFrames])
-
-  // Calculate frame position
-  const row = Math.floor(currentFrame / gridSize)
-  const col = currentFrame % gridSize
-  
-  return (
-    <div
-      className="border border-rich-black-400 rounded"
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: `url(${src})`,
-        backgroundSize: `${size * gridSize}px ${size * gridSize}px`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: `-${col * size}px -${row * size}px`,
-        imageRendering: 'pixelated'
-      }}
-      title={alt}
-    />
-  )
-}
+import Navigation from '@/components/Navigation'
+import SpriteAnimation from '@/components/SpriteAnimation'
 
 export default function HowToUseSpriteSheets() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
-      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
-        <Link href="/" className="flex items-center gap-2">
-          <Image 
-            src="/pink-sprinkles.gif" 
-            alt="Pink sprinkles" 
-            width={32}
-            height={32}
-            className="w-8 h-8 object-contain"
-            unoptimized
-          />
-          <span className="text-lg sm:text-xl font-bold text-mimi-pink-500">Sprite Sheet Generator</span>
-        </Link>
-        
-        {/* Desktop Menu */}
-        <div className="hidden sm:flex items-center gap-6">
-          <Link href="/" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
-            Home
-          </Link>
-          <a href="/pricing" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
-            Pricing
-          </a>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="sm:hidden flex flex-col gap-1 p-2"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-opacity ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-          <div className={`w-5 h-0.5 bg-purple-pizzazz transition-transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
-        </button>
-
-        {/* Mobile Menu Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-rich-black-200 border-b border-rich-black-300 sm:hidden z-50">
-            <div className="flex flex-col px-4 py-4 space-y-4">
-              <Link 
-                href="/" 
-                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <a 
-                href="/pricing" 
-                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Pricing
-              </a>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navigation active="how-to-use-sprite-sheets" />
 
       {/* Hero Section */}
       <div className="text-center py-12 sm:py-16 px-4">
