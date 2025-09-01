@@ -30,7 +30,22 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      dbName: 'main' // Force connection to main database
+      dbName: 'main', // Force connection to main database
+      // SSL/TLS configuration for production
+      ssl: true,
+      sslValidate: true,
+      // Connection pool settings
+      maxPoolSize: 10,
+      minPoolSize: 1,
+      maxIdleTimeMS: 30000,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      // Retry settings
+      retryWrites: true,
+      retryReads: true,
+      // Additional SSL options for Atlas
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false
     }
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts)
@@ -38,8 +53,10 @@ async function connectToDatabase() {
 
   try {
     cached.conn = await cached.promise
+    console.log('MongoDB connection successful')
   } catch (e) {
     cached.promise = null
+    console.error('MongoDB connection failed:', e)
     throw e
   }
 

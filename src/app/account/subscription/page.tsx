@@ -73,7 +73,7 @@ export default function SubscriptionPage() {
       case 'pro':
         return {
           name: 'Pro',
-          price: '$4.99/month',
+          price: '$5.99/month',
           icon: <Zap className="w-5 h-5" />,
           color: 'bg-purple-pizzazz',
           features: ['30 generations per month', 'All grid sizes (2x2, 3x3, 4x4, 5x5)', 'Priority support']
@@ -227,16 +227,16 @@ export default function SubscriptionPage() {
                     <div className="space-y-2">
                       <h4 className="font-medium text-purple-pizzazz">Upgrade to Pro</h4>
                       <p className="text-sm text-citron-600">30 generations per month + all grid sizes</p>
-                      <a href="https://buy.stripe.com/test_00wcN69JC7Ik7Xe8Gjawo00" target="_blank" rel="noopener noreferrer">
+                      <a href="https://buy.stripe.com/aFaaEY2had2E5P66ybawo02" target="_blank" rel="noopener noreferrer">
                         <Button className="w-full bg-mimi-pink-500 hover:bg-purple-pizzazz text-white">
-                          Upgrade to Pro - $4.99/month
+                          Upgrade to Pro - $5.99/month
                         </Button>
                       </a>
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-medium text-purple-pizzazz">Upgrade to Premium</h4>
                       <p className="text-sm text-citron-600">Unlimited generations + custom grids</p>
-                      <a href="https://buy.stripe.com/test_6oUaEYg80aUwfpG6ybawo01" target="_blank" rel="noopener noreferrer">
+                      <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
                         <Button className="w-full bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white">
                           Upgrade to Premium - $14.99/month
                         </Button>
@@ -249,7 +249,7 @@ export default function SubscriptionPage() {
                   <div className="space-y-2">
                     <h4 className="font-medium text-purple-pizzazz">Upgrade to Premium</h4>
                     <p className="text-sm text-citron-600">Unlimited generations + custom grids</p>
-                    <a href="https://buy.stripe.com/test_6oUaEYg80aUwfpG6ybawo01" target="_blank" rel="noopener noreferrer">
+                    <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
                       <Button className="w-full bg-purple-pizzazz hover:bg-purple-pizzazz/90 text-white">
                         Upgrade to Premium - $14.99/month
                       </Button>

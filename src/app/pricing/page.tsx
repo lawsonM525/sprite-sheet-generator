@@ -31,7 +31,7 @@ export default function PricingPage() {
     },
     {
       name: 'Pro',
-      price: '$4.99',
+      price: '$5.99',
       period: 'per month',
       description: 'Great for regular creators and small projects',
       features: [
@@ -147,7 +147,7 @@ export default function PricingPage() {
                   )}
 
                   {plan.name === 'Pro' ? (
-                    <a href="https://buy.stripe.com/test_00wcN69JC7Ik7Xe8Gjawo00" target="_blank" rel="noopener noreferrer">
+                    <a href="https://buy.stripe.com/aFaaEY2had2E5P66ybawo02" target="_blank" rel="noopener noreferrer">
                       <Button 
                         variant={plan.buttonVariant}
                         className={`w-full ${
@@ -161,7 +161,7 @@ export default function PricingPage() {
                       </Button>
                     </a>
                   ) : plan.name === 'Premium' ? (
-                    <a href="https://buy.stripe.com/test_6oUaEYg80aUwfpG6ybawo01" target="_blank" rel="noopener noreferrer">
+                    <a href="https://buy.stripe.com/cNi5kE3lefaM0uM09Nawo03" target="_blank" rel="noopener noreferrer">
                       <Button 
                         variant={plan.buttonVariant}
                         className={`w-full ${
