@@ -130,6 +130,9 @@ export default function Home() {
           <a href="/how-to-use-sprite-sheets" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             How to use sprite sheets
           </a>
+          <a href="/free-sprite-sheet-generator" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
+            Free Sprite Sheet Generator
+          </a>
           <a href="/pricing" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Pricing
           </a>
@@ -151,15 +154,22 @@ export default function Home() {
         {isMobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-rich-black-200 border-b border-rich-black-300 sm:hidden z-50">
             <div className="flex flex-col px-4 py-4 space-y-4">
-              <a 
-                href="/how-to-use-sprite-sheets" 
+              <a
+                href="/how-to-use-sprite-sheets"
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How to use sprite sheets
               </a>
-              <a 
-                href="/pricing" 
+              <a
+                href="/free-sprite-sheet-generator"
+                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Free Sprite Sheet Generator
+              </a>
+              <a
+                href="/pricing"
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

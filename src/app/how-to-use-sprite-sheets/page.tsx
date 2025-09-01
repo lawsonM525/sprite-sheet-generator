@@ -71,6 +71,9 @@ export default function HowToUseSpriteSheets() {
           <Link href="/" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Home
           </Link>
+          <Link href="/free-sprite-sheet-generator" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
+            Free Sprite Sheet Generator
+          </Link>
           <a href="/pricing" className="text-purple-pizzazz hover:text-citron-500 transition-colors">
             Pricing
           </a>
@@ -91,15 +94,22 @@ export default function HowToUseSpriteSheets() {
         {isMobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-rich-black-200 border-b border-rich-black-300 sm:hidden z-50">
             <div className="flex flex-col px-4 py-4 space-y-4">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
-              <a 
-                href="/pricing" 
+              <Link
+                href="/free-sprite-sheet-generator"
+                className="text-purple-pizzazz hover:text-citron-500 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Free Sprite Sheet Generator
+              </Link>
+              <a
+                href="/pricing"
                 className="text-purple-pizzazz hover:text-citron-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
