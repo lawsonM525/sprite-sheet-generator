@@ -146,6 +146,20 @@ export async function generateSpriteSheet(
                 // Don't fail the generation if usage update fails
               })
               
+              // Track goal with DataFast (client analytics)
+              try {
+                (window as any)?.datafast?.('sprite_generated', {
+                  concept: concept?.toString().slice(0, 255),
+                  style: style?.toString().slice(0, 255),
+                  frame_count: frameCount.toString(),
+                  canvas_size: canvasSize.toString(),
+                  background: background?.toString().slice(0, 255),
+                  reference_image: referenceImage ? 'true' : 'false',
+                })
+              } catch (_) {
+                // ignore client analytics failures
+              }
+              
               resolve(data.data)
               return
             } else if (data.type === 'error') {
