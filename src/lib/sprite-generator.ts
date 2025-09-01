@@ -36,11 +36,29 @@ interface ProgressCallback {
   }): void
 }
 
+interface SpriteConfig {
+  concept: string
+  style: string
+  frameCount: number
+  canvasSize: number
+  background: 'transparent' | 'solid'
+  referenceImage?: File
+}
+
+interface ProgressData {
+  type: 'status' | 'progress' | 'complete' | 'error'
+  message?: string
+  progress?: number
+  currentFrame?: number
+  totalFrames?: number
+  data?: any
+}
+
 export async function generateSpriteSheet(
-  options: GenerateOptions, 
-  onProgress?: ProgressCallback
+  config: SpriteConfig,
+  onProgress?: (progress: ProgressData) => void
 ): Promise<SpriteResult> {
-  const { concept, style, frameCount, canvasSize, background, referenceImage } = options
+  const { concept, style, frameCount, canvasSize, background, referenceImage } = config
 
   try {
     // Create FormData to handle both text and file data
@@ -118,6 +136,16 @@ export async function generateSpriteSheet(
                 hasSpriteSheet: !!data.data.spriteSheet,
                 spriteSheetStart: data.data.spriteSheet?.substring(0, 50)
               })
+              
+              // Update usage after successful generation
+              fetch('/api/user/usage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+              }).catch(usageError => {
+                console.error('Failed to update usage:', usageError)
+                // Don't fail the generation if usage update fails
+              })
+              
               resolve(data.data)
               return
             } else if (data.type === 'error') {
@@ -135,17 +163,14 @@ export async function generateSpriteSheet(
       function processBuffer(remainingBuffer: string) {
         const lines = remainingBuffer.split('\n')
         for (const line of lines) {
-          if (line.trim()) {
-            processLine(line)
-          }
+          processLine(line)
         }
       }
-
+      
       readStream()
     })
   } catch (error) {
     console.error('Generation error:', error)
-    throw new Error('Failed to generate sprite sheet. Please check your concept and try again.')
+    throw error
   }
 }
-

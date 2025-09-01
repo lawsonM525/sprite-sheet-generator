@@ -78,7 +78,7 @@ export function canGenerateSprite(user: any, frameCount: number, canvasSize: num
     return { canGenerate: false, reason: 'Please sign in to generate sprites' }
   }
 
-  const limits = getSubscriptionLimits(user.subscription.status)
+  const limits = getSubscriptionLimits(user.subscription.planId || user.subscription.status)
   
   // Check monthly limit
   if (user.usage.monthlyGenerations >= limits.monthlyGenerations) {

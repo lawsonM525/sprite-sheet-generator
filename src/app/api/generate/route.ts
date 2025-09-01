@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
+import { getServerSession } from 'next-auth'
+import { canGenerateSprite } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession()
     const { concept, style, frameCount, canvasSize, background } = await request.json()
+
+    // Check user authentication and limits
+    if (session?.user) {
+      const sessionUser = session.user as any
+      const canGenerate = canGenerateSprite(sessionUser, frameCount, canvasSize)
+      
+      if (!canGenerate.canGenerate) {
+        return NextResponse.json({ error: canGenerate.reason }, { status: 403 })
+      }
+    }
 
     // Use API keys from environment variables
     const openaiKey = process.env.OPENAI_API_KEY
@@ -80,6 +93,22 @@ Keep the subject identity constant, background constant, and camera static.`
     console.log('Assembling sprite sheet...')
     const { spriteSheet, atlas } = await assembleSpriteSheetServer(frameImages, frameCount, canvasSize)
     console.log('Sprite sheet generated:', !!spriteSheet, spriteSheet?.substring(0, 50))
+
+    // Update user usage after successful generation
+    if (session?.user?.email) {
+      try {
+        await fetch(`${process.env.NEXTAUTH_URL}/api/user/usage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cookie': request.headers.get('Cookie') || ''
+          }
+        })
+      } catch (error) {
+        console.error('Failed to update usage:', error)
+        // Don't fail the generation if usage update fails
+      }
+    }
 
     const result = {
       framePlan,
