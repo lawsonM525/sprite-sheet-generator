@@ -92,20 +92,22 @@ export default function Home() {
 
   const getUsageLimit = () => {
     switch (user?.subscription.planId) {
-      case 'pro': return 1000
-      case 'premium': return 50
+      case 'pro': return 30
+      case 'premium': return Infinity
       default: return 3
     }
   }
 
   const getUsageDisplay = () => {
-    if (!user) return '0/3 Uses Today'
+    if (!user) return '0/3 Uses This Week'
     
     const limit = getUsageLimit()
     const used = user.usage.monthlyGenerations
     
     if (user.subscription.planId === 'free') {
-      return `${used}/3 Uses Today`
+      return `${used}/3 Uses This Week`
+    } else if (user.subscription.planId === 'premium') {
+      return `Unlimited Uses This Month`
     } else {
       return `${used}/${limit} Uses This Month`
     }

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import mongoose from 'mongoose'
 import connectToDatabase from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -25,10 +26,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Check if we need to reset monthly usage (new month)
+    // Determine reset policy based on plan (weekly for free, monthly for paid)
     const now = new Date()
     const lastReset = new Date(user.usage.lastResetDate)
-    const shouldReset = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()
+    const plan = user?.subscription?.planId || 'free'
+    let shouldReset = false
+    if (plan === 'free') {
+      const diffMs = now.getTime() - lastReset.getTime()
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+      shouldReset = diffMs >= sevenDaysMs
+    } else {
+      shouldReset = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()
+    }
 
     let updateData: any = {
       $inc: {
@@ -37,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (shouldReset) {
-      // Reset monthly counter and update reset date
+      // Reset period counter and update reset date
       updateData = {
         $inc: {
           'usage.totalGenerations': 1

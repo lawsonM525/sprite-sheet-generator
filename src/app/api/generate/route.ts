@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { canGenerateSprite } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     const { concept, style, frameCount, canvasSize, background } = await request.json()
 
     // Check user authentication and limits

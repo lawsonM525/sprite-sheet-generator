@@ -55,14 +55,15 @@ export default function AccountPage() {
 
   const getUsageLimit = () => {
     switch (user.subscription.planId) {
-      case 'free': return 5
-      case 'premium': return 50
-      case 'pro': return 1000
-      default: return 5
+      case 'pro': return 30
+      case 'premium': return Infinity
+      default: return 3
     }
   }
 
-  const usagePercentage = (user.usage.monthlyGenerations / getUsageLimit()) * 100
+  const usagePercentage = user.subscription.planId === 'premium'
+    ? 100
+    : (user.usage.monthlyGenerations / getUsageLimit()) * 100
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -121,7 +122,7 @@ export default function AccountPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="w-5 h-5" />
-              Usage This Month
+              {user.subscription.planId === 'free' ? 'Usage This Week' : 'Usage This Month'}
             </CardTitle>
             <CardDescription>
               Track your sprite sheet generation usage
@@ -132,12 +133,12 @@ export default function AccountPage() {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Generations Used</span>
                 <span className="text-sm font-mono">
-                  {user.usage.monthlyGenerations} / {getUsageLimit()}
+                  {user.subscription.planId === 'premium' ? 'Unlimited' : `${user.usage.monthlyGenerations} / ${getUsageLimit()}`}
                 </span>
               </div>
               <Progress value={Math.min(usagePercentage, 100)} className="h-2" />
               <p className="text-xs text-muted-foreground mt-1">
-                Resets monthly on the {new Date(user.usage.lastResetDate).getDate()}th
+                {user.subscription.planId === 'free' ? 'Resets weekly' : 'Resets monthly'}
               </p>
             </div>
 
@@ -151,7 +152,7 @@ export default function AccountPage() {
             {user.subscription.planId === 'free' && usagePercentage > 80 && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                 <p className="text-sm text-orange-800">
-                  You&apos;re approaching your monthly limit. 
+                  You&apos;re approaching your weekly limit. 
                   <Link href="/account/subscription" className="font-medium underline ml-1">
                     Upgrade your plan
                   </Link>

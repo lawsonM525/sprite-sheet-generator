@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import connectToDatabase from '@/lib/mongodb'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -20,12 +21,13 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       // Return default free plan for new users
+      const nowIso = new Date().toISOString()
       return NextResponse.json({
         plan: 'free',
         planStatus: 'active',
         generationsUsed: 0,
         generationsLimit: 3,
-        resetDate: getNextWeekReset()
+        resetDate: getResetDate('free', nowIso)
       })
     }
 
@@ -58,20 +60,14 @@ function getGenerationsLimit(plan: string): number {
 }
 
 function getResetDate(plan: string, lastResetDate?: Date | string): string {
-  const now = new Date()
-  
+  const base = lastResetDate ? new Date(lastResetDate) : new Date()
   if (plan === 'free') {
-    // Weekly reset for free plan
-    return getNextWeekReset()
+    // Weekly reset for free plan based on lastResetDate
+    const next = new Date(base.getTime() + 7 * 24 * 60 * 60 * 1000)
+    return next.toISOString()
   } else {
-    // Monthly reset for paid plans
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    // Monthly reset for paid plans: first day of next month after lastResetDate
+    const nextMonth = new Date(base.getFullYear(), base.getMonth() + 1, 1)
     return nextMonth.toISOString()
   }
-}
-
-function getNextWeekReset(): string {
-  const now = new Date()
-  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-  return nextWeek.toISOString()
 }

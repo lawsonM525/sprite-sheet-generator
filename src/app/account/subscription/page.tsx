@@ -136,6 +136,7 @@ export default function SubscriptionPage() {
 
   const planDetails = getPlanDetails(subscription?.plan || 'free')
   const usageProgress = getUsageProgress()
+  const periodLabel = subscription?.plan === 'free' ? 'This Week' : 'This Month'
 
   return (
     <div className="min-h-screen bg-rich-black p-6">
@@ -182,7 +183,7 @@ export default function SubscriptionPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-mimi-pink-500">
                 <Calendar className="w-5 h-5" />
-                Usage This Period
+                {`Usage ${periodLabel}`}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -196,7 +197,7 @@ export default function SubscriptionPage() {
                 <>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-citron-600">Generations Used</span>
+                      <span className="text-citron-600">{`Generations Used ${periodLabel}`}</span>
                       <span className="text-citron-400">
                         {subscription?.generationsUsed || 0} / {subscription?.plan === 'free' ? 3 : 30}
                       </span>

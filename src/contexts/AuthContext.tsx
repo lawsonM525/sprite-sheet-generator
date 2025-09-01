@@ -36,6 +36,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 function AuthProviderInner({ children }: { children: ReactNode }) {
   const { data: session, status, update } = useSession()
   const [user, setUser] = useState<User | null>(null)
+  const [refreshedOnMount, setRefreshedOnMount] = useState(false)
   const loading = status === 'loading'
 
   useEffect(() => {
@@ -74,6 +75,78 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       }, 2 * 60 * 1000) // 2 minutes
 
       return () => clearInterval(interval)
+    }
+  }, [session, update])
+
+  // One-time session refresh on mount once authenticated to ensure enriched fields
+  useEffect(() => {
+    if (status === 'authenticated' && !refreshedOnMount) {
+      update()
+      setRefreshedOnMount(true)
+    }
+  }, [status, refreshedOnMount, update])
+
+  // Fallback: if subscription/usage missing in session, hydrate from API
+  useEffect(() => {
+    const hydrateFromApi = async () => {
+      if (!session?.user) return
+      const su = session.user as any
+      const missing = !su.subscription || !su.usage || !su.subscription.planId
+      if (!missing) return
+      try {
+        const res = await fetch('/api/user/subscription')
+        if (res.ok) {
+          const data = await res.json()
+          setUser(prev => {
+            const base = prev || {
+              id: su.id || '',
+              email: su.email || '',
+              name: su.name,
+              image: su.image,
+              role: 'user',
+              subscription: su.subscription,
+              usage: su.usage,
+            }
+            return {
+              ...base,
+              subscription: {
+                status: data.planStatus || 'free',
+                planId: data.plan || 'free',
+                stripeCustomerId: data.stripeCustomerId ?? null,
+                stripeSubscriptionId: data.subscriptionId ?? null,
+                currentPeriodEnd: null,
+                cancelAtPeriodEnd: false,
+              },
+              usage: {
+                ...base.usage,
+                monthlyGenerations: data.generationsUsed ?? 0,
+                lastResetDate: data.resetDate || new Date().toISOString(),
+              },
+            }
+          })
+        }
+      } catch (e) {
+        console.error('Failed to hydrate subscription from API:', e)
+      }
+    }
+    hydrateFromApi()
+  }, [session])
+
+  // Refresh session on window focus and when tab becomes visible
+  useEffect(() => {
+    if (!session?.user) return
+
+    const handleFocus = () => update()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') update()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [session, update])
 

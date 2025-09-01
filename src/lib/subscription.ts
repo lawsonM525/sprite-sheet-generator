@@ -9,7 +9,7 @@ export interface SubscriptionLimits {
 
 export const SUBSCRIPTION_LIMITS: Record<string, SubscriptionLimits> = {
   free: {
-    monthlyGenerations: 5,
+    monthlyGenerations: 3,
     maxFrames: 9,
     maxCanvasSize: 256,
     priorityProcessing: false,
@@ -17,7 +17,7 @@ export const SUBSCRIPTION_LIMITS: Record<string, SubscriptionLimits> = {
     support: 'basic'
   },
   premium: {
-    monthlyGenerations: 50,
+    monthlyGenerations: 999999,
     maxFrames: 25,
     maxCanvasSize: 512,
     priorityProcessing: true,
@@ -25,7 +25,7 @@ export const SUBSCRIPTION_LIMITS: Record<string, SubscriptionLimits> = {
     support: 'priority'
   },
   pro: {
-    monthlyGenerations: 1000,
+    monthlyGenerations: 30,
     maxFrames: 100,
     maxCanvasSize: 1024,
     priorityProcessing: true,
@@ -41,7 +41,7 @@ export const SUBSCRIPTION_PLANS = {
     currency: 'USD',
     interval: 'month',
     features: [
-      '50 generations per month',
+      'Unlimited generations',
       'Up to 25 frames per animation',
       'Canvas sizes up to 512px',
       'Priority processing',
@@ -55,7 +55,7 @@ export const SUBSCRIPTION_PLANS = {
     currency: 'USD',
     interval: 'month',
     features: [
-      '1000 generations per month',
+      '30 generations per month',
       'Up to 100 frames per animation',
       'Canvas sizes up to 1024px',
       'Fastest processing',
