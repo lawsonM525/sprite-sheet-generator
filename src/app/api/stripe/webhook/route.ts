@@ -46,39 +46,38 @@ export async function POST(request: NextRequest) {
       console.log(`Updating user subscription for ${email}:`, updates)
       console.log(`Database name: ${db.databaseName}`)
       console.log(`Collection: users`)
-      
-      // Transform updates to match the expected subscription structure
-      const subscriptionUpdates: any = {}
-      
+
+      // Prepare updates for both top-level and nested subscription fields
+      const finalUpdates: any = { updatedAt: new Date() }
+
       if (updates.plan) {
-        subscriptionUpdates['subscription.planId'] = updates.plan
-        subscriptionUpdates['subscription.status'] = updates.planStatus || 'active'
+        finalUpdates.plan = updates.plan
+        finalUpdates.planStatus = updates.planStatus || 'active'
+        finalUpdates['subscription.planId'] = updates.plan
+        finalUpdates['subscription.status'] = updates.planStatus || 'active'
       }
       if (updates.planStatus) {
-        subscriptionUpdates['subscription.status'] = updates.planStatus
+        finalUpdates.planStatus = updates.planStatus
+        finalUpdates['subscription.status'] = updates.planStatus
       }
       if (updates.stripeCustomerId) {
-        subscriptionUpdates['subscription.stripeCustomerId'] = updates.stripeCustomerId
+        finalUpdates.stripeCustomerId = updates.stripeCustomerId
+        finalUpdates['subscription.stripeCustomerId'] = updates.stripeCustomerId
       }
       if (updates.subscriptionId) {
-        subscriptionUpdates['subscription.stripeSubscriptionId'] = updates.subscriptionId
+        finalUpdates.subscriptionId = updates.subscriptionId
+        finalUpdates['subscription.stripeSubscriptionId'] = updates.subscriptionId
       }
-      
-      // Add any other direct updates
-      const finalUpdates = {
-        ...subscriptionUpdates,
-        updatedAt: new Date()
-      }
-      
+
       console.log(`Final database updates:`, finalUpdates)
-      
+
       const result = await db.collection('users').updateOne(
         { email },
         { $set: finalUpdates },
         { upsert: true }
       )
       console.log(`Database update result:`, result)
-      
+
       // Verify the update
       const user = await db.collection('users').findOne({ email })
       console.log(`User after update:`, user)
