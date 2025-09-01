@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -6,6 +9,7 @@ import Navigation from '@/components/Navigation'
 import SpriteAnimation from '@/components/SpriteAnimation'
 
 export default function HowToUseSpriteSheets() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
