@@ -1,19 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-
-export const metadata: Metadata = {
-  title: 'CSS Sprite Generator Tutorial & Tool',
-  description:
-    'Generate CSS classes for sprites to reduce HTTP requests and boost load performance. Includes links to the main generator and optimization guides.'
-}
 
 export default function CssSpriteGeneratorPage() {
   const [name, setName] = useState('icon')
