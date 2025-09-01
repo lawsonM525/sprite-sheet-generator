@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /account
+Disallow: /api
+Disallow: /subscription
+
+Sitemap: https://sprite-sheet-generator.vercel.app/sitemap.xml
