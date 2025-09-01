@@ -13,8 +13,7 @@ export default function HowToUseSpriteSheets() {
   return (
     <div className="min-h-screen bg-rich-black">
       {/* Navigation */}
-codex/create-free-sprite-sheet-generator-page
-      <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
+       <nav className="relative flex justify-between items-center px-4 sm:px-6 py-4 border-b border-rich-black-300">
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/pink-sprinkles.gif" 
@@ -80,8 +79,7 @@ codex/create-free-sprite-sheet-generator-page
           </div>
         )}
       </nav>
-main
-
+ 
       {/* Hero Section */}
       <div className="text-center py-12 sm:py-16 px-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-mimi-pink-500 mb-6">

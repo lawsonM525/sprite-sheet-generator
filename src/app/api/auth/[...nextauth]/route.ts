@@ -11,10 +11,15 @@ const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: 'openid email profile'
+        }
+      }
     })
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug in production temporarily
   callbacks: {
     async jwt({ token, account, profile }: any) {
       if (account && profile) {
@@ -77,21 +82,33 @@ const authOptions = {
   },
   events: {
     async signIn({ user, account, profile }: any) {
+      console.log('=== NEXTAUTH SIGN-IN EVENT ===')
+      console.log('User object:', JSON.stringify(user, null, 2))
+      console.log('Account object:', JSON.stringify(account, null, 2))
+      console.log('Profile object:', JSON.stringify(profile, null, 2))
+      console.log('Environment check:')
+      console.log('- NODE_ENV:', process.env.NODE_ENV)
+      console.log('- NEXTAUTH_URL:', process.env.NEXTAUTH_URL)
+      console.log('- GOOGLE_CLIENT_ID exists:', !!process.env.GOOGLE_CLIENT_ID)
+      console.log('- GOOGLE_CLIENT_SECRET exists:', !!process.env.GOOGLE_CLIENT_SECRET)
+      console.log('- NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET)
+      
       // Update last login time and log OAuth usage
       if (account?.provider === 'google') {
         console.log(`Google OAuth sign-in successful for: ${user.email}`)
-        console.log(`OAuth Client ID used: ${process.env.GOOGLE_CLIENT_ID}`)
-        console.log(`Account details:`, {
-          provider: account.provider,
-          type: account.type,
-          providerAccountId: account.providerAccountId
-        })
+        console.log(`OAuth Client ID used: ${process.env.GOOGLE_CLIENT_ID?.substring(0, 20)}...`)
         
-        await db.collection('users').updateOne(
-          { email: user.email },
-          { $set: { lastLoginAt: new Date().toISOString() } }
-        )
+        try {
+          await db.collection('users').updateOne(
+            { email: user.email },
+            { $set: { lastLoginAt: new Date().toISOString() } }
+          )
+          console.log('Database update successful')
+        } catch (error) {
+          console.error('Database update failed:', error)
+        }
       }
+      console.log('=== END SIGN-IN EVENT ===')
     }
   },
   session: {
