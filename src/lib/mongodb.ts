@@ -32,8 +32,7 @@ async function connectToDatabase() {
       bufferCommands: false,
       dbName: 'main', // Force connection to main database
       // SSL/TLS configuration for production
-      ssl: true,
-      sslValidate: true,
+      tls: true,
       // Connection pool settings
       maxPoolSize: 10,
       minPoolSize: 1,
@@ -43,7 +42,7 @@ async function connectToDatabase() {
       // Retry settings
       retryWrites: true,
       retryReads: true,
-      // Additional SSL options for Atlas
+      // Additional TLS options for Atlas
       tlsAllowInvalidCertificates: false,
       tlsAllowInvalidHostnames: false
     }
