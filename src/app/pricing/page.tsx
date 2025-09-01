@@ -51,7 +51,7 @@ export default function PricingPage() {
         'No custom art styles',
         'No unlimited generations'
       ],
-      buttonText: 'Start Pro Trial',
+      buttonText: 'Go Pro',
       buttonVariant: 'default' as const,
       popular: true
     },
