@@ -48,6 +48,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* DataFast queue to ensure early events are captured */}
+        <Script id="datafast-queue" strategy="beforeInteractive">
+          {`
+            window.datafast = window.datafast || function() {
+              window.datafast.q = window.datafast.q || [];
+              window.datafast.q.push(arguments);
+            };
+          `}
+        </Script>
         {/* Analytics Scripts */}
         <script
           defer

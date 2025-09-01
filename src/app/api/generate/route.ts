@@ -4,8 +4,11 @@ import { GoogleGenAI } from '@google/genai'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { canGenerateSprite } from '@/lib/subscription'
+import { logGenerationStart, logGenerationComplete } from '@/lib/logging'
 
 export async function POST(request: NextRequest) {
+  let logId: any = null
+  let startedAt: number = Date.now()
   try {
     const session = await getServerSession(authOptions)
     const { concept, style, frameCount, canvasSize, background } = await request.json()
@@ -18,6 +21,28 @@ export async function POST(request: NextRequest) {
       if (!canGenerate.canGenerate) {
         return NextResponse.json({ error: canGenerate.reason }, { status: 403 })
       }
+    }
+
+    // Logging: mark generation start (best-effort)
+    startedAt = Date.now()
+    try {
+      logId = await logGenerationStart(request, {
+        concept,
+        style,
+        frameCount,
+        canvasSize,
+        background,
+        referenceImageProvided: false,
+        route: 'generate',
+        user: session?.user ? {
+          id: (session.user as any).id,
+          email: (session.user as any).email,
+          planId: (session.user as any).subscription?.planId,
+        } : undefined,
+      })
+    } catch (e) {
+      // do not block on logging
+      console.error('start log failed (non-blocking):', e)
     }
 
     // Use API keys from environment variables
@@ -120,9 +145,23 @@ Keep the subject identity constant, background constant, and camera static.`
       prompts: imagePrompts,
     }
 
+    // Logging: completion success (best-effort)
+    try {
+      await logGenerationComplete(logId, true, startedAt)
+    } catch (e) {
+      console.error('complete log failed (non-blocking):', e)
+    }
+
     return NextResponse.json(result)
   } catch (error) {
     console.error('Generation error:', error)
+    // Logging: completion failure (best-effort)
+    try {
+      // Use the logId if it was created before the error (no-op if null)
+      await logGenerationComplete(logId, false, startedAt, (error as any)?.message)
+    } catch (e) {
+      // swallow
+    }
     return NextResponse.json(
       { error: 'Failed to generate sprite sheet' },
       { status: 500 }

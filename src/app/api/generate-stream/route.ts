@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { logGenerationStart, logGenerationComplete } from '@/lib/logging'
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
@@ -10,6 +13,33 @@ export async function POST(request: NextRequest) {
   const canvasSize = parseInt(formData.get('canvasSize') as string)
   const background = formData.get('background') as string
   const referenceImage = formData.get('referenceImage') as File | null
+
+  // Get session for user info
+  const session = await getServerSession(authOptions)
+
+  // Best-effort logging start
+  let logId: any = null
+  let startedAt: number = Date.now()
+  try {
+    startedAt = Date.now()
+    logId = await logGenerationStart(request, {
+      concept,
+      style,
+      frameCount,
+      canvasSize,
+      background,
+      referenceImageProvided: !!referenceImage,
+      route: 'generate-stream',
+      user: session?.user ? {
+        id: (session.user as any).id,
+        email: (session.user as any).email,
+        planId: (session.user as any).subscription?.planId,
+      } : undefined,
+    })
+  } catch (e) {
+    // non-blocking
+    console.error('start log (stream) failed:', e)
+  }
 
   // Create a readable stream for Server-Sent Events
   const encoder = new TextEncoder()
@@ -22,15 +52,25 @@ export async function POST(request: NextRequest) {
           const data = `data: ${JSON.stringify(progress)}\n\n`
           controller.enqueue(encoder.encode(data))
         }
-      ).then((result) => {
+      ).then(async (result) => {
         // Send final result
         const data = `data: ${JSON.stringify({ type: 'complete', data: result })}\n\n`
         controller.enqueue(encoder.encode(data))
+        try {
+          await logGenerationComplete(logId, true, startedAt)
+        } catch (e) {
+          console.error('complete log (stream) failed:', e)
+        }
         controller.close()
-      }).catch((error) => {
+      }).catch(async (error) => {
         // Send error
         const data = `data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`
         controller.enqueue(encoder.encode(data))
+        try {
+          await logGenerationComplete(logId, false, startedAt, error.message)
+        } catch (e) {
+          // swallow
+        }
         controller.close()
       })
     }

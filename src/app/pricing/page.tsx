@@ -164,14 +164,14 @@ export default function PricingPage() {
                       if (currentPlan === 'pro') {
                         return (
                           <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
-                            You're already a Pro user
+                            You&apos;re already a Pro user
                           </Button>
                         )
                       }
                       if (currentPlan === 'premium') {
                         return (
                           <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
-                            You're already a Premium user
+                            You&apos;re already a Premium user
                           </Button>
                         )
                       }
@@ -188,7 +188,7 @@ export default function PricingPage() {
                       if (currentPlan === 'premium') {
                         return (
                           <Button variant={plan.buttonVariant} className={baseClasses} size="lg" disabled>
-                            You're already a Premium user
+                            You&apos;re already a Premium user
                           </Button>
                         )
                       }
