@@ -15,7 +15,7 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/:path*',
+        source: '/((?!api/stripe/webhook).*)',
         has: [
           {
             type: 'header',
@@ -23,8 +23,21 @@ const nextConfig = {
             value: 'http',
           },
         ],
-        destination: 'https://sprite-sheet-generator.com/:path*',
+        destination: 'https://sprite-sheet-generator.com/$1',
         permanent: true,
+      },
+    ]
+  },
+  async headers() {
+    return [
+      {
+        source: '/api/stripe/webhook',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
       },
     ]
   },
