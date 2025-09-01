@@ -9,6 +9,13 @@ export const metadata: Metadata = {
     description: 'Learn how to create smooth web animations using sprite sheets. Better than GIFs - faster loading, smaller files, and full CSS control.',
     type: 'article',
     url: 'https://sprite-sheet-generator.com/how-to-use-sprite-sheets',
+    images: [
+      {
+        url: '/how-to-use-sprite-sheets/opengraph-image',
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',

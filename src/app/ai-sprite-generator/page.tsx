@@ -3,7 +3,10 @@ import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'AI Sprite Generator - Models & Examples | Sprite Sheet Generator',
-  description: 'Explore AI-powered sprite sheet generation, supported models, prompt examples, and API access.',
+ 
+  description:
+    'Explore AI-powered sprite sheet generation with the Nano Banana model, prompt examples, and API access. More models coming soon.',
+ main
   keywords: [
     'AI sprite generator',
     'sprite sheet AI',
@@ -11,12 +14,16 @@ export const metadata: Metadata = {
     'API access',
     'AI models for sprites',
     'sprite licensing',
-    'generation limits'
+    'generation limits',
+    'Nano Banana AI'
+main
   ],
   openGraph: {
     title: 'AI Sprite Generator',
     description:
-      'Capabilities, supported models, examples and API usage for AI-generated sprite sheets.',
+
+      'Capabilities, Nano Banana model details, examples and API usage for AI-generated sprite sheets. More models coming soon.',
+main
     images: [
       {
         url: '/ai-sprite-generator/opengraph-image?sprite=/dancing-frog.gif',
@@ -30,7 +37,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AI Sprite Generator',
     description:
-      'Capabilities, supported models, examples and API usage for AI-generated sprite sheets.',
+
+      'Capabilities, Nano Banana model details, examples and API usage for AI-generated sprite sheets. More models coming soon.',
+ main
     images: ['/ai-sprite-generator/opengraph-image?sprite=/dancing-frog.gif']
   },
   alternates: {
@@ -45,7 +54,9 @@ const jsonLd = {
   applicationCategory: 'MultimediaApplication',
   operatingSystem: 'Web',
   description:
-    'Web app that turns text prompts into sprite sheets using models like DALL·E and Gemini.',
+
+    'Web app that turns text prompts into sprite sheets using the Nano Banana model. Support for additional models is coming soon.',
+main
   offers: {
     '@type': 'Offer',
     price: '0',
@@ -72,9 +83,10 @@ export default function AISpriteGeneratorPage() {
         <section>
           <h2 className="text-2xl font-semibold text-mimi-pink-500 mb-2">Supported Models</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li>OpenAI DALL·E 3 for detailed illustrations</li>
-            <li>Google Gemini Vision for consistent characters</li>
-            <li>Stable Diffusion for open-source experimentation</li>
+
+            <li>Nano Banana (current model)</li>
+            <li>Additional models like DALL·E and Stable Diffusion coming soon</li>
+main
           </ul>
         </section>
 
@@ -98,7 +110,9 @@ export default function AISpriteGeneratorPage() {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     prompt: 'pixel knight walking',
-    model: 'gpt-image-1',
+
+    model: 'nano-banana',
+ main
   }),
 })`}</pre>
         </section>
