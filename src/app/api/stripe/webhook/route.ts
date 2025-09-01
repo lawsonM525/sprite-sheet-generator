@@ -83,8 +83,11 @@ export async function POST(request: NextRequest) {
       console.log(`User after update:`, user)
     }
 
-    // Handle the event
+    // Handle the event - Listen to ALL events and process subscription-related ones
+    console.log(`Processing event: ${event.type}`)
+    
     switch (event.type) {
+      // Checkout Session Events
       case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session
         if (session.customer_email) {
@@ -98,48 +101,57 @@ export async function POST(request: NextRequest) {
 
       case 'checkout.session.async_payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session
-        if (session.mode === 'subscription' && session.customer_email) {
+        if (session.mode === 'subscription') {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
-          await updateUserSubscription(session.customer_email, {
-            stripeCustomerId: session.customer,
-            subscriptionId: session.subscription,
-            plan,
-            planStatus: 'active'
-          })
-          console.log(`Async payment succeeded for ${session.customer_email}: ${plan}`)
+          const customer = session.customer
+            ? await stripe.customers.retrieve(session.customer as string) as Stripe.Customer
+            : undefined
+          const email = (customer && customer.email) || (session as any).customer_email || (session as any).customer_details?.email
+          if (email) {
+            await updateUserSubscription(email, {
+              stripeCustomerId: session.customer,
+              subscriptionId: session.subscription,
+              plan,
+              planStatus: 'active'
+            })
+            console.log(`Async payment succeeded for ${email}: ${plan}`)
+          }
         }
         break
       }
 
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
-        if (session.mode === 'subscription' && session.customer_email) {
+        if (session.mode === 'subscription') {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
-          await updateUserSubscription(session.customer_email, {
-            stripeCustomerId: session.customer,
-            subscriptionId: session.subscription,
-            plan,
-            planStatus: 'active'
-          })
-          console.log(`Checkout completed for ${session.customer_email}: ${plan}`)
+          const customer = session.customer
+            ? await stripe.customers.retrieve(session.customer as string) as Stripe.Customer
+            : undefined
+          const email = (customer && customer.email) || (session as any).customer_email || (session as any).customer_details?.email
+          if (email) {
+            await updateUserSubscription(email, {
+              stripeCustomerId: session.customer,
+              subscriptionId: session.subscription,
+              plan,
+              planStatus: 'active'
+            })
+            console.log(`Checkout completed for ${email}: ${plan}`)
+          }
         }
         break
       }
 
       case 'checkout.session.expired': {
         const session = event.data.object as Stripe.Checkout.Session
-        if (session.customer_email) {
-          console.log(`Checkout session expired for ${session.customer_email}`)
-        }
+        console.log(`Checkout session expired: ${session.id}`)
         break
       }
 
+      // Customer Events
       case 'customer.created': {
         const customer = event.data.object as Stripe.Customer
         if (customer.email) {
@@ -167,19 +179,17 @@ export async function POST(request: NextRequest) {
 
       case 'customer.updated': {
         const customer = event.data.object as Stripe.Customer
-        if (customer.email) {
-          console.log(`Customer updated: ${customer.email}`)
-        }
+        console.log(`Customer updated: ${customer.id}`)
         break
       }
 
+      // Subscription Events
       case 'customer.subscription.created': {
         const subscription = event.data.object as Stripe.Subscription
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer
         if (customer.email) {
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
           await updateUserSubscription(customer.email, {
             subscriptionId: subscription.id,
             plan,
@@ -222,7 +232,6 @@ export async function POST(request: NextRequest) {
         if (customer.email) {
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
           await updateUserSubscription(customer.email, {
             plan,
             planStatus: 'active'
@@ -237,6 +246,7 @@ export async function POST(request: NextRequest) {
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer
         if (customer.email) {
           console.log(`Trial ending soon for ${customer.email}`)
+          // Optionally send notification email here
         }
         break
       }
@@ -247,7 +257,6 @@ export async function POST(request: NextRequest) {
         if (customer.email) {
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
           await updateUserSubscription(customer.email, {
             plan,
             planStatus: subscription.status
@@ -263,7 +272,6 @@ export async function POST(request: NextRequest) {
         if (customer.email) {
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
           await updateUserSubscription(customer.email, {
             plan,
             planStatus: subscription.status
@@ -282,6 +290,7 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      // Invoice Events
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
         const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer
@@ -301,7 +310,6 @@ export async function POST(request: NextRequest) {
           const subscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string)
           const priceId = subscription.items.data[0]?.price.id
           const plan = getPlanFromPriceId(priceId)
-
           await updateUserSubscription(customer.email, {
             plan,
             planStatus: 'active'
@@ -311,8 +319,60 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      case 'invoice.payment_action_required': {
+        const invoice = event.data.object as Stripe.Invoice
+        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer
+        if (customer.email) {
+          await updateUserSubscription(customer.email, {
+            planStatus: 'incomplete'
+          })
+          console.log(`Payment action required for ${customer.email}`)
+        }
+        break
+      }
+
+      // Payment Intent Events
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log(`Payment intent succeeded: ${paymentIntent.id}`)
+        break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log(`Payment intent failed: ${paymentIntent.id}`)
+        break
+      }
+
+      // Charge Events
+      case 'charge.succeeded': {
+        const charge = event.data.object as Stripe.Charge
+        console.log(`Charge succeeded: ${charge.id}`)
+        break
+      }
+
+      case 'charge.failed': {
+        const charge = event.data.object as Stripe.Charge
+        console.log(`Charge failed: ${charge.id}`)
+        break
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge
+        console.log(`Charge refunded: ${charge.id}`)
+        break
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute
+        console.log(`Dispute created: ${dispute.id}`)
+        break
+      }
+
+      // All other events - just log them
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+        console.log(`Event received: ${event.type} - ${event.id}`)
+        console.log(`Event data:`, JSON.stringify(event.data.object, null, 2))
     }
 
     return NextResponse.json({ received: true })

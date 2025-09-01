@@ -3,7 +3,8 @@ import GoogleProvider from "next-auth/providers/google"
 import { MongoClient, ObjectId } from "mongodb"
 
 const client = new MongoClient(process.env.MONGODB_URI!)
-const db = client.db() // Use default database from connection string
+// Use the same database name as other modules ("main") to avoid mismatch
+const db = client.db('main')
 
 const authOptions = {
   providers: [
@@ -49,10 +50,12 @@ const authOptions = {
           { upsert: true, returnDocument: 'after' }
         )
 
-        if (result) {
-          token.userId = result._id.toString()
-          token.subscription = result.subscription
-          token.usage = result.usage
+        // In the MongoDB Node driver, the updated document is returned under `value`
+        const userDoc = (result as any).value
+        if (userDoc) {
+          token.userId = userDoc._id.toString()
+          token.subscription = userDoc.subscription
+          token.usage = userDoc.usage
         }
       }
       return token

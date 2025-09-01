@@ -29,15 +29,17 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Calculate usage limits and reset dates
+    // Calculate usage limits and reset dates from nested schema
+    const plan = user?.subscription?.planId || 'free'
+    const planStatus = user?.subscription?.status || 'free'
     const subscription = {
-      plan: user.plan || 'free',
-      planStatus: user.planStatus || 'active',
-      stripeCustomerId: user.stripeCustomerId,
-      subscriptionId: user.subscriptionId,
-      generationsUsed: user.generationsUsed || 0,
-      generationsLimit: getGenerationsLimit(user.plan || 'free'),
-      resetDate: getResetDate(user.plan || 'free', user.lastResetDate)
+      plan,
+      planStatus,
+      stripeCustomerId: user?.subscription?.stripeCustomerId ?? null,
+      subscriptionId: user?.subscription?.stripeSubscriptionId ?? null,
+      generationsUsed: user?.usage?.monthlyGenerations || 0,
+      generationsLimit: getGenerationsLimit(plan),
+      resetDate: getResetDate(plan, user?.usage?.lastResetDate)
     }
 
     return NextResponse.json(subscription)
@@ -55,7 +57,7 @@ function getGenerationsLimit(plan: string): number {
   }
 }
 
-function getResetDate(plan: string, lastResetDate?: Date): string {
+function getResetDate(plan: string, lastResetDate?: Date | string): string {
   const now = new Date()
   
   if (plan === 'free') {
