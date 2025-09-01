@@ -11,6 +11,10 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sprite-sheet-generator.com'),
+  alternates: {
+    canonical: '/',
+  },
   title: 'Sprite Sheet Generator - AI-Powered Animation Creator',
   description: 'Generate sprite sheets for CSS animations using AI. Create pixel art, neon outlines, and more with our easy-to-use tool.',
   keywords: 'sprite sheet, animation, CSS, AI, generator, pixel art, game development',
