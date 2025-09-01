@@ -13,14 +13,34 @@ import { SpritePreview } from '@/components/SpritePreview'
 import { ProgressBar } from '@/components/ProgressBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { Footer } from '@/components/Footer'
+import { SpriteAnimation } from '@/components/SpriteAnimation'
 import { generateSpriteSheet } from '@/lib/sprite-generator'
 
 const TEMPLATES = [
-  { value: 'growing-star', label: 'Growing Star', description: 'A star that expands from small to large' },
-  { value: 'blinking-eye', label: 'Blinking Eye', description: 'An eye that blinks smoothly' },
-  { value: 'walking-cycle', label: 'Walking Cycle', description: 'Simple character walk animation' },
-  { value: 'flame', label: 'Flame', description: 'Animated fire effect' },
-  { value: 'loading-spinner', label: 'Loading Spinner', description: 'Rotating loading indicator' },
+  { 
+    value: 'blinking-eye', 
+    label: 'Blinking Eye', 
+    description: 'An eye that blinks smoothly',
+    sprite: '/sample-sprites/blinking-blue-eye-2x2.png',
+    gridSize: { rows: 2, cols: 2 },
+    speed: 400
+  },
+  { 
+    value: 'walking-cycle', 
+    label: 'Walking Cycle', 
+    description: 'Simple character walk animation',
+    sprite: '/sample-sprites/walking-girl-3x3.png',
+    gridSize: { rows: 3, cols: 3 },
+    speed: 100
+  },
+  { 
+    value: 'flame', 
+    label: 'Flame', 
+    description: 'Animated fire effect',
+    sprite: '/sample-sprites/fire-2x2.png',
+    gridSize: { rows: 2, cols: 2 },
+    speed: 600
+  },
 ]
 
 const STYLES = [
@@ -441,6 +461,22 @@ export default function Home() {
                 <CardTitle className="text-lg sm:text-xl text-mimi-pink-500">{template.label}</CardTitle>
                 <CardDescription className="text-citron-500 text-sm sm:text-base">{template.description}</CardDescription>
               </CardHeader>
+              
+              {/* Animation Preview */}
+              {template.sprite && (
+                <div className="px-4 sm:px-6 pb-4">
+                  <div className="bg-rich-black-300 rounded-lg p-6 flex justify-center">
+                    <SpriteAnimation
+                      src={template.sprite}
+                      frameCount={template.gridSize.rows * template.gridSize.cols}
+                      size={120}
+                      speed={template.speed}
+                      gridSize={template.gridSize}
+                    />
+                  </div>
+                </div>
+              )}
+              
               <CardContent className="p-4 sm:p-6 pt-0">
                 <Button variant="outline" className="w-full border-purple-pizzazz text-purple-pizzazz hover:bg-purple-pizzazz hover:text-white text-sm sm:text-base">
                   Use This Template

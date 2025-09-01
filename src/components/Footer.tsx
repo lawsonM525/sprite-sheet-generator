@@ -54,6 +54,14 @@ export function Footer() {
             rel="noopener noreferrer"
             className="hover:text-purple-pizzazz transition-colors"
           >
+            Request a Feature
+          </a>
+          <a
+            href="https://lwsnlabs.featurebase.app/?b=68b4745211edb0628245f839"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-purple-pizzazz transition-colors"
+          >
             Report a Bug
           </a>
         </div>

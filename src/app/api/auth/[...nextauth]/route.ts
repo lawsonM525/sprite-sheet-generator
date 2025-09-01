@@ -2,20 +2,40 @@ import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { MongoClient, ObjectId } from "mongodb"
 
-const client = new MongoClient(process.env.MONGODB_URI!, {
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 10000,
-  maxPoolSize: 10,
-  minPoolSize: 5,
-  maxIdleTimeMS: 30000,
-  serverApi: {
-    version: '1' as const,
-    strict: true,
-    deprecationErrors: true,
+// Global MongoDB client to reuse connections
+let cachedClient: MongoClient | null = null
+let cachedDb: any = null
+
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb }
   }
-})
-// Use the same database name as other modules ("main") to avoid mismatch
-const db = client.db('main')
+
+  const client = new MongoClient(process.env.MONGODB_URI!, {
+    serverSelectionTimeoutMS: 30000,
+    connectTimeoutMS: 30000,
+    maxPoolSize: 10,
+    minPoolSize: 1,
+    maxIdleTimeMS: 30000,
+    retryWrites: true,
+    w: 'majority',
+  })
+
+  try {
+    await client.connect()
+    await client.db('admin').command({ ping: 1 })
+    console.log('MongoDB connection successful')
+    
+    const db = client.db('main')
+    cachedClient = client
+    cachedDb = db
+    
+    return { client, db }
+  } catch (error) {
+    console.error('MongoDB connection failed:', error)
+    throw error
+  }
+}
 
 const authOptions = {
   providers: [
@@ -35,8 +55,8 @@ const authOptions = {
     async jwt({ token, account, profile }: any) {
       if (account && profile) {
         try {
-          // Ensure MongoDB connection
-          await client.connect()
+          // Connect to MongoDB
+          const { db } = await connectToDatabase()
           
           // Store user in our custom users collection
           const result = await db.collection('users').findOneAndUpdate(
@@ -76,6 +96,7 @@ const authOptions = {
             token.userId = userDoc._id.toString()
             token.subscription = userDoc.subscription
             token.usage = userDoc.usage
+            console.log('User created/updated successfully:', profile.email)
           }
         } catch (error) {
           console.error('JWT callback MongoDB error:', error)
@@ -91,8 +112,8 @@ const authOptions = {
     async session({ session, token }: any) {
       if (token.userId) {
         try {
-          // Ensure MongoDB connection
-          await client.connect()
+          // Connect to MongoDB
+          const { db } = await connectToDatabase()
           
           // Fetch latest user data from database
           const user = await db.collection('users').findOne({ _id: new ObjectId(token.userId) })
@@ -134,7 +155,7 @@ const authOptions = {
         console.log(`OAuth Client ID used: ${process.env.GOOGLE_CLIENT_ID?.substring(0, 20)}...`)
         
         try {
-          await client.connect()
+          const { db } = await connectToDatabase()
           await db.collection('users').updateOne(
             { email: user.email },
             { $set: { lastLoginAt: new Date().toISOString() } }

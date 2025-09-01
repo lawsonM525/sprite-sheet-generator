@@ -4,15 +4,27 @@ import { useEffect, useState } from 'react'
 
 export interface SpriteAnimationProps {
   src: string
-  alt: string
+  alt?: string
   size?: number
   speed?: number
-  gridSize?: number
+  gridSize?: number | { rows: number; cols: number }
+  frameCount?: number
 }
 
-export function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3 }: SpriteAnimationProps) {
+export function SpriteAnimation({ 
+  src, 
+  alt = 'Sprite animation', 
+  size = 64, 
+  speed = 150, 
+  gridSize = 3,
+  frameCount
+}: SpriteAnimationProps) {
   const [currentFrame, setCurrentFrame] = useState(0)
-  const totalFrames = gridSize * gridSize
+  
+  // Handle both number and object gridSize formats
+  const gridRows = typeof gridSize === 'object' ? gridSize.rows : gridSize
+  const gridCols = typeof gridSize === 'object' ? gridSize.cols : gridSize
+  const totalFrames = frameCount || (gridRows * gridCols)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -22,8 +34,8 @@ export function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3
     return () => clearInterval(interval)
   }, [speed, totalFrames])
 
-  const row = Math.floor(currentFrame / gridSize)
-  const col = currentFrame % gridSize
+  const row = Math.floor(currentFrame / gridCols)
+  const col = currentFrame % gridCols
 
   return (
     <div
@@ -32,7 +44,7 @@ export function SpriteAnimation({ src, alt, size = 64, speed = 150, gridSize = 3
         width: size,
         height: size,
         backgroundImage: `url(${src})`,
-        backgroundSize: `${size * gridSize}px ${size * gridSize}px`,
+        backgroundSize: `${size * gridCols}px ${size * gridRows}px`,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: `-${col * size}px -${row * size}px`,
         imageRendering: 'pixelated'
