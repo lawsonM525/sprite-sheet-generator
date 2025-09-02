@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     url: 'https://sprite-sheet-generator.com/pricing',
     images: [
       {
-        url: '/pricing/opengraph-image',
+        url: '/open-graph-img.png',
         width: 1200,
         height: 630,
       },
@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pricing - Sprite Sheet Generator',
     description: 'Simple, transparent pricing for AI-powered sprite sheet generation. Start free and upgrade as you grow.',
+    images: ['/open-graph-img.png'],
   },
   alternates: {
     canonical: 'https://sprite-sheet-generator.com/pricing',

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     url: 'https://sprite-sheet-generator.com/how-to-use-sprite-sheets',
     images: [
       {
-        url: '/how-to-use-sprite-sheets/opengraph-image',
+        url: '/open-graph-img.png',
         width: 1200,
         height: 630,
       },
@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'How to Use Sprite Sheets for Web Animation | Complete Guide',
     description: 'Learn how to create smooth web animations using sprite sheets. Better than GIFs - faster loading, smaller files, and full CSS control.',
+    images: ['/open-graph-img.png'],
   },
   alternates: {
     canonical: 'https://sprite-sheet-generator.com/how-to-use-sprite-sheets',
@@ -34,3 +35,4 @@ export default function HowToUseSpriteSheetLayout({
 }) {
   return children
 }
+

@@ -30,6 +30,12 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sprite Sheet Generator - AI-Powered Animation Creator',
+    description: 'Generate sprite sheets for CSS animations using AI. Create pixel art, neon outlines, and more with our easy-to-use tool.',
+    images: ['/open-graph-img.png'],
+  },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

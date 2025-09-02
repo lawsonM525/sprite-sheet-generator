@@ -21,7 +21,14 @@ export default function OgImage() {
           fontWeight: 700,
         }}
       >
-        Sprite Sheet Generator
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://sprite-sheet-generator.com/open-graph-img.png"
+          width={1200}
+          height={630}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          alt="Sprite Sheet Generator"
+        />
       </div>
     ),
     size
