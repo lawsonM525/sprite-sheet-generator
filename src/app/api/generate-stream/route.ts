@@ -580,11 +580,11 @@ async function checkRateLimit(
     {
       $inc: { count: 1 },
       $setOnInsert: {
+        key,
         route,
         identifier,
         windowStart,
         expiresAt: new Date(bucketStartMs + bucketMs),
-        count: 0,
       },
     },
     { upsert: true, returnDocument: 'after' }

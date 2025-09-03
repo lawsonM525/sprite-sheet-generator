@@ -201,7 +201,6 @@ async function checkRateLimit(
         identifier,
         windowStart,
         expiresAt: new Date(bucketStartMs + bucketMs),
-        count: 0,
       },
     },
     { upsert: true, returnDocument: 'after' }
