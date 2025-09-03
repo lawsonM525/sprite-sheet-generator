@@ -1,9 +1,12 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { GoogleGenAI } from '@google/genai'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { logGenerationStart, logGenerationComplete } from '@/lib/logging'
+import mongoose from 'mongoose'
+import connectToDatabase from '@/lib/mongodb'
+import { canGenerateSprite } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
@@ -16,6 +19,33 @@ export async function POST(request: NextRequest) {
 
   // Get session for user info
   const session = await getServerSession(authOptions)
+
+  // IP-based checks
+  const ip = getClientIp(request)
+  if (isBlockedIp(ip)) {
+    return NextResponse.json({ error: 'Access blocked' }, { status: 403 })
+  }
+
+  // Require authentication (close the hole allowing anonymous generation)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Please sign in to generate sprites' }, { status: 401 })
+  }
+
+  // Enforce plan and usage limits
+  const can = canGenerateSprite(session.user as any, frameCount, canvasSize)
+  if (!can.canGenerate) {
+    return NextResponse.json({ error: can.reason }, { status: 403 })
+  }
+
+  // Per-user rate limit to throttle bursts
+  const identifier = (session.user as any).id || (session.user as any).email || ip
+  const rl = await checkRateLimit(identifier, 'generate-stream', 20, 300) // 20 requests / 5 minutes
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: `Rate limit exceeded. Try again in ${rl.resetSeconds}s.` },
+      { status: 429 }
+    )
+  }
 
   // Best-effort logging start
   let logId: any = null
@@ -506,4 +536,64 @@ function generateCSS(frameCount: number, frameSize: number): string {
     background-position: -${totalWidth}px 0;
   }
 }`
+}
+
+function getClientIp(request: NextRequest): string {
+  const ipHeader = request.headers.get('x-forwarded-for') || ''
+  const ip = ipHeader.split(',')[0]?.trim()
+  return ip || 'unknown'
+}
+
+function isBlockedIp(ip: string): boolean {
+  const blocked = (process.env.BLOCKED_IPS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+  return blocked.includes(ip)
+}
+
+async function checkRateLimit(
+  identifier: string,
+  route: string,
+  limit: number,
+  windowSeconds: number
+): Promise<{ ok: boolean; remaining: number; resetSeconds: number }> {
+  await connectToDatabase()
+  const db = mongoose.connection.db
+  if (!db) {
+    return { ok: true, remaining: limit, resetSeconds: windowSeconds }
+  }
+
+  // TTL cleanup for old windows
+  try {
+    await db.collection('rate_limits').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+  } catch {}
+
+  const now = new Date()
+  const bucketMs = windowSeconds * 1000
+  const bucketStartMs = Math.floor(now.getTime() / bucketMs) * bucketMs
+  const windowStart = new Date(bucketStartMs)
+  const key = `${route}:${identifier}:${windowStart.toISOString()}`
+
+  const res = await db.collection('rate_limits').findOneAndUpdate(
+    { key },
+    {
+      $inc: { count: 1 },
+      $setOnInsert: {
+        route,
+        identifier,
+        windowStart,
+        expiresAt: new Date(bucketStartMs + bucketMs),
+        count: 0,
+      },
+    },
+    { upsert: true, returnDocument: 'after' }
+  )
+
+  const doc: any = res?.value ?? { count: 1, windowStart }
+  const count: number = typeof doc.count === 'number' ? doc.count : 1
+  const elapsed = Math.floor((now.getTime() - windowStart.getTime()) / 1000)
+  const resetSeconds = Math.max(1, windowSeconds - elapsed)
+  const ok = count <= limit
+  return { ok, remaining: Math.max(0, limit - count), resetSeconds }
 }

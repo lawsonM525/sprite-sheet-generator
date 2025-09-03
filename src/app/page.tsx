@@ -67,7 +67,7 @@ const STYLES = [
 ]
 
 export default function Home() {
-  const { user } = useAuth()
+  const { user, signInWithGoogle } = useAuth()
   const { update } = useSession()
   const [concept, setConcept] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('')
@@ -85,6 +85,7 @@ export default function Home() {
   const [totalFrames, setTotalFrames] = useState<number>()
   const [referenceImage, setReferenceImage] = useState<File | null>(null)
   const [referenceImagePreview, setReferenceImagePreview] = useState<string | null>(null)
+  const [showSigninNotice, setShowSigninNotice] = useState(false)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -127,6 +128,16 @@ export default function Home() {
   }
 
   const handleGenerate = async () => {
+    // Require sign-in before generating
+    if (!user) {
+      setShowSigninNotice(true)
+      setError('Please sign in or sign up for free to be able to generate spritesheets.')
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+      return
+    }
+
     setError('')
     setIsGenerating(true)
     setProgress(0)
@@ -260,6 +271,21 @@ export default function Home() {
           </div>
         )}
       </nav>
+
+      {/* Auth notice when unauthenticated and generation is attempted */}
+      {!user && showSigninNotice && (
+        <div className="bg-yellow-900/30 border-b border-yellow-600">
+          <div className="max-w-7xl mx-auto px-4 py-3 text-yellow-100 text-sm flex items-center justify-center gap-3">
+            <span>Please sign in or sign up for free to be able to generate spritesheets.</span>
+            <button
+              onClick={signInWithGoogle}
+              className="underline underline-offset-2 hover:text-yellow-50"
+            >
+              Sign in
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <div className="text-center py-16 px-4">

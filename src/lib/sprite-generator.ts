@@ -80,7 +80,12 @@ export async function generateSpriteSheet(
     })
 
     if (!response.ok) {
-      throw new Error('Failed to generate sprite sheet')
+      try {
+        const data = await response.json()
+        throw new Error(data?.error || `Request failed (${response.status})`)
+      } catch (_) {
+        throw new Error(`Request failed (${response.status})`)
+      }
     }
 
     return new Promise((resolve, reject) => {

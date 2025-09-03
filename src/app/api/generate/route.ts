@@ -5,6 +5,68 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { canGenerateSprite } from '@/lib/subscription'
 import { logGenerationStart, logGenerationComplete } from '@/lib/logging'
+import mongoose from 'mongoose'
+import connectToDatabase from '@/lib/mongodb'
+
+function getClientIp(request: NextRequest): string {
+  const ipHeader = request.headers.get('x-forwarded-for') || ''
+  const ip = ipHeader.split(',')[0]?.trim()
+  return ip || 'unknown'
+}
+
+function isBlockedIp(ip: string): boolean {
+  const blocked = (process.env.BLOCKED_IPS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+  return blocked.includes(ip)
+}
+
+async function checkRateLimit(
+  identifier: string,
+  route: string,
+  limit: number,
+  windowSeconds: number
+): Promise<{ ok: boolean; remaining: number; resetSeconds: number }> {
+  await connectToDatabase()
+  const db = mongoose.connection.db
+  if (!db) {
+    return { ok: true, remaining: limit, resetSeconds: windowSeconds }
+  }
+
+  // TTL cleanup for old windows
+  try {
+    await db.collection('rate_limits').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+  } catch {}
+
+  const now = new Date()
+  const bucketMs = windowSeconds * 1000
+  const bucketStartMs = Math.floor(now.getTime() / bucketMs) * bucketMs
+  const windowStart = new Date(bucketStartMs)
+  const key = `${route}:${identifier}:${windowStart.toISOString()}`
+
+  const res = await db.collection('rate_limits').findOneAndUpdate(
+    { key },
+    {
+      $inc: { count: 1 },
+      $setOnInsert: {
+        route,
+        identifier,
+        windowStart,
+        expiresAt: new Date(bucketStartMs + bucketMs),
+        count: 0,
+      },
+    },
+    { upsert: true, returnDocument: 'after' }
+  )
+
+  const doc: any = res?.value ?? { count: 1, windowStart }
+  const count: number = typeof doc.count === 'number' ? doc.count : 1
+  const elapsed = Math.floor((now.getTime() - windowStart.getTime()) / 1000)
+  const resetSeconds = Math.max(1, windowSeconds - elapsed)
+  const ok = count <= limit
+  return { ok, remaining: Math.max(0, limit - count), resetSeconds }
+}
 
 export async function POST(request: NextRequest) {
   let logId: any = null
@@ -13,15 +75,43 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     const { concept, style, frameCount, canvasSize, background } = await request.json()
 
-    // Check user authentication and limits
-    if (session?.user) {
-      const sessionUser = session.user as any
-      const canGenerate = canGenerateSprite(sessionUser, frameCount, canvasSize)
-      
-      if (!canGenerate.canGenerate) {
-        return NextResponse.json({ error: canGenerate.reason }, { status: 403 })
-      }
+    // IP blocklist
+    const ip = getClientIp(request)
+    if (isBlockedIp(ip)) {
+      return NextResponse.json({ error: 'Access blocked' }, { status: 403 })
     }
+
+    // Require authentication (was previously optional)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Please sign in to generate sprites' }, { status: 401 })
+    }
+
+    // Check user limits
+    const sessionUser = session.user as any
+    const canGenerate = canGenerateSprite(sessionUser, frameCount, canvasSize)
+    if (!canGenerate.canGenerate) {
+      return NextResponse.json({ error: canGenerate.reason }, { status: 403 })
+    }
+
+    // Per-user rate limit (20 req / 5 min)
+    const identifier = sessionUser.id || sessionUser.email || ip
+    const rl = await checkRateLimit(identifier, 'generate', 20, 300)
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: `Rate limit exceeded. Try again in ${rl.resetSeconds}s.` },
+        { status: 429 }
+      )
+    }
+
+    // Check user authentication and limits
+    // if (session?.user) {
+    //   const sessionUser = session.user as any
+    //   const canGenerate = canGenerateSprite(sessionUser, frameCount, canvasSize)
+      
+    //   if (!canGenerate.canGenerate) {
+    //     return NextResponse.json({ error: canGenerate.reason }, { status: 403 })
+    //   }
+    // }
 
     // Logging: mark generation start (best-effort)
     startedAt = Date.now()
