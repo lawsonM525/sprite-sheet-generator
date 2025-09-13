@@ -60,10 +60,15 @@ export async function POST(request: NextRequest) {
     // Create Stripe Customer Portal session
     const returnUrl = new URL('/account/subscription', request.nextUrl.origin).toString()
     try {
-      const portalSession = await stripe.billingPortal.sessions.create({
+      const configuration = process.env.STRIPE_PORTAL_CONFIGURATION_ID
+      const params: Stripe.BillingPortal.SessionCreateParams = {
         customer: customerId,
         return_url: returnUrl,
-      })
+      }
+      if (configuration) {
+        ;(params as any).configuration = configuration
+      }
+      const portalSession = await stripe.billingPortal.sessions.create(params)
       return NextResponse.json({ url: portalSession.url })
     } catch (err: any) {
       const details = {
@@ -97,4 +102,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

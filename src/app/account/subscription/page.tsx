@@ -47,24 +47,34 @@ export default function SubscriptionPage() {
   }
 
   const createPortalSession = async () => {
-    if (!subscription?.stripeCustomerId) return
-    
+    const fallbackUrl = process.env.NEXT_PUBLIC_STRIPE_PORTAL_LOGIN_LINK_URL
     setPortalLoading(true)
     try {
-      const response = await fetch('/api/stripe/create-portal-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: subscription.stripeCustomerId })
-      })
-      
-      if (response.ok) {
-        const { url } = await response.json()
-        window.open(url, '_blank')
+      if (subscription?.stripeCustomerId) {
+        const response = await fetch('/api/stripe/create-portal-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId: subscription.stripeCustomerId })
+        })
+        if (response.ok) {
+          const { url } = await response.json()
+          window.open(url, '_blank')
+          return
+        }
+        const text = await response.text()
+        console.error('Portal session creation failed:', response.status, text)
+      }
+      // Fallback when no customerId or API failed
+      if (fallbackUrl) {
+        window.open(fallbackUrl, '_blank')
       } else {
-        console.error('Portal session creation failed:', response.status, await response.text())
+        console.error('No Stripe customer ID and no NEXT_PUBLIC_STRIPE_PORTAL_LOGIN_LINK_URL configured.')
       }
     } catch (error) {
       console.error('Failed to create portal session:', error)
+      if (fallbackUrl) {
+        window.open(fallbackUrl, '_blank')
+      }
     } finally {
       setPortalLoading(false)
     }
@@ -261,7 +271,7 @@ export default function SubscriptionPage() {
                 )}
 
                 {/* Billing Management */}
-                {subscription?.stripeCustomerId && (
+                {(subscription?.stripeCustomerId || process.env.NEXT_PUBLIC_STRIPE_PORTAL_LOGIN_LINK_URL) && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-purple-pizzazz">Billing Management</h4>
                     <p className="text-sm text-citron-600">Update payment method, view invoices, cancel subscription</p>
