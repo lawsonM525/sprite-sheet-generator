@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-})
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET })
     
-    if (!session?.user?.email) {
+    if (!token?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -22,9 +19,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Stripe Customer Portal session
+    const returnUrl = new URL('/account/subscription', request.nextUrl.origin).toString()
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `https://www.sprite-sheet-generator.com/account/subscription`,
+      return_url: returnUrl,
     })
 
     return NextResponse.json({ url: portalSession.url })
@@ -33,3 +31,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
